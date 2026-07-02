@@ -6,18 +6,26 @@ const fraunces = Fraunces({
   variable: "--font-fraunces",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600"],
+  display: "swap",
 });
 
 const martianMono = Martian_Mono({
   variable: "--font-martian-mono",
   subsets: ["latin"],
   weight: ["400", "500", "700"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
   title: "OddsTrust — On-Chain Trust Oracle",
   description:
     "Live trust verification for World Cup odds. Infrastructure agents read from, not a consumer betting app.",
+  openGraph: {
+    title: "OddsTrust — On-Chain Trust Oracle",
+    description:
+      "Live trust verification for World Cup odds. Infrastructure agents read from.",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
@@ -28,9 +36,9 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${fraunces.variable} ${martianMono.variable}`}
+      className={`${fraunces.variable} ${martianMono.variable} bg-[var(--color-bg-void)]`}
     >
-      <body>{children}</body>
+      <body className="min-h-screen">{children}</body>
     </html>
   );
 }
