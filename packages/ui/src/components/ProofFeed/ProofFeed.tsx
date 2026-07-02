@@ -42,19 +42,6 @@ function shuffle<T>(arr: T[]): T[] {
   return a;
 }
 
-let shuffledTemplates = shuffle(templates);
-let templateIndex = 0;
-
-function nextTemplate() {
-  const tpl = shuffledTemplates[templateIndex % shuffledTemplates.length];
-  templateIndex++;
-  if (templateIndex >= shuffledTemplates.length) {
-    shuffledTemplates = shuffle(templates);
-    templateIndex = 0;
-  }
-  return tpl;
-}
-
 function now() {
   return new Date().toISOString().replace('T', ' ').slice(11, 19);
 }
@@ -103,18 +90,33 @@ export function ProofFeed({ fullPage = false }: { fullPage?: boolean }) {
   }, [fullPage]);
 
   const [entries, setEntries] = useState<FeedEntry[]>(() =>
-    Array.from({ length: 6 }, (_, i) => ({
-      ...nextTemplate(),
+    templates.slice(0, 6).map((tpl, i) => ({
+      ...tpl,
       id: i,
       ts: now(),
     }))
   );
 
+  const templateStateRef = useRef<{
+    pool: Omit<FeedEntry, 'id' | 'ts'>[];
+    idx: number;
+  }>({
+    pool: shuffle(templates),
+    idx: 0,
+  });
+
   const addEntry = useCallback(() => {
     if (paused) return;
+    const state = templateStateRef.current;
+    const tpl = state.pool[state.idx % state.pool.length];
+    state.idx++;
+    if (state.idx >= state.pool.length) {
+      state.pool = shuffle(templates);
+      state.idx = 0;
+    }
     const id = idRef.current++;
     setEntries((current) => [
-      { ...nextTemplate(), id, ts: now() },
+      { ...tpl, id, ts: now() },
       ...current.slice(0, fullPage ? 99 : 49),
     ]);
   }, [paused, fullPage]);
