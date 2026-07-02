@@ -135,7 +135,7 @@ export function ProofFeed({ fullPage = false }: { fullPage?: boolean }) {
   return (
     <section
       ref={sectionRef}
-      className={`border-b border-[var(--color-line-hairline)] ${fullPage ? 'px-6 py-10' : 'px-6 py-10'}`}
+      className={`${fullPage ? '' : 'border-b border-[var(--color-line-hairline)]'} px-6 py-10`}
     >
       <div
         className="mx-auto max-w-4xl transition-all duration-700 ease-out"

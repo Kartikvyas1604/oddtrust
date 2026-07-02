@@ -27,10 +27,7 @@ export function GatePanel() {
   }, []);
 
   return (
-    <section
-      ref={sectionRef}
-      className="border-b border-[var(--color-line-hairline)] px-6 py-16 sm:py-20"
-    >
+    <section ref={sectionRef}>
       <div
         className="mx-auto max-w-5xl transition-all duration-700 ease-out"
         style={{

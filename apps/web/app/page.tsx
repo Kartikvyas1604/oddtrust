@@ -11,7 +11,7 @@ export default function Home() {
   return (
     <>
       <Hero />
-      <section className="border-b border-[var(--color-line-hairline)] px-6 py-6">
+      <section className="border-b border-[var(--color-line-hairline)] px-6 py-8">
         <div className="mx-auto max-w-4xl">
           <p
             className="mb-4 text-xs font-[400] uppercase tracking-[0.15em] text-[var(--color-text-secondary)]"

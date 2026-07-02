@@ -1,7 +1,16 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Nav } from '../Nav/Nav';
+import Link from 'next/link';
+import { usePathname } from 'next/navigation';
+
+const navLinks = [
+  { href: '/', label: 'Overview' },
+  { href: '/matches', label: 'Matches' },
+  { href: '/oracle', label: 'Oracle' },
+  { href: '/proof-feed', label: 'Proof Feed' },
+  { href: '/docs', label: 'Docs' },
+];
 
 function useSlot() {
   const [slot, setSlot] = useState(310_442_891);
@@ -22,6 +31,43 @@ function useSlot() {
   return { slot, timestamp };
 }
 
+function NavLinks({ mobile }: { mobile?: boolean }) {
+  const pathname = usePathname();
+
+  return (
+    <div className={`flex ${mobile ? 'gap-4 overflow-x-auto' : 'items-center gap-4 sm:gap-6'}`}>
+      {navLinks.map((link) => {
+        const isActive = link.href === '/'
+          ? pathname === '/'
+          : pathname.startsWith(link.href);
+
+        return (
+          <Link
+            key={link.href}
+            href={link.href}
+            className="relative shrink-0 text-[11px] uppercase tracking-[0.1em] transition-colors sm:text-[12px]"
+            style={{
+              fontFamily: 'var(--font-fraunces), serif',
+              fontWeight: isActive ? 500 : 400,
+              color: isActive
+                ? 'var(--color-text-primary)'
+                : 'var(--color-text-tertiary)',
+            }}
+          >
+            {link.label}
+            {isActive && (
+              <span
+                className="absolute -bottom-1 left-0 h-px bg-[var(--color-pitch-green)]"
+                style={{ width: '100%' }}
+              />
+            )}
+          </Link>
+        );
+      })}
+    </div>
+  );
+}
+
 export function TopStrip() {
   const { slot, timestamp } = useSlot();
 
@@ -37,7 +83,7 @@ export function TopStrip() {
           </h1>
           <span className="hidden h-4 w-px bg-[var(--color-line-hairline)] sm:block" />
           <div className="hidden sm:block">
-            <Nav />
+            <NavLinks />
           </div>
         </div>
         <div className="flex items-center gap-3 sm:gap-4">
@@ -65,7 +111,7 @@ export function TopStrip() {
         </div>
       </div>
       <div className="border-t border-[var(--color-line-hairline)] px-4 py-2 sm:hidden">
-        <Nav />
+        <NavLinks mobile />
       </div>
     </header>
   );

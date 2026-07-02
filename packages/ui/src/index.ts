@@ -4,4 +4,3 @@ export { Hero } from './components/Hero';
 export { MatchGrid, MatchCard, fixtures } from './components/MatchGrid';
 export { GatePanel } from './components/GatePanel';
 export { ProofFeed } from './components/ProofFeed';
-export { Nav } from './components/Nav';
