@@ -45,7 +45,7 @@ export function Hero() {
         </p>
         <div style={{ animation: 'count-up 0.6s ease-out 400ms both' }}>
           <span
-            className="block text-[120px] leading-none font-[600] sm:text-[160px]"
+            className="block text-7xl leading-none font-[600] sm:text-8xl md:text-[160px]"
             style={{
               fontFamily: 'var(--font-martian-mono), monospace',
               color: 'var(--color-trophy-gold)',
@@ -55,7 +55,7 @@ export function Hero() {
             }}
           >
             {score}
-            <span className="text-[48px] sm:text-[64px]" style={{ color: 'var(--color-trophy-gold)' }}>/100</span>
+            <span className="text-3xl sm:text-4xl md:text-[64px]" style={{ color: 'var(--color-trophy-gold)' }}>/100</span>
           </span>
         </div>
         <div
