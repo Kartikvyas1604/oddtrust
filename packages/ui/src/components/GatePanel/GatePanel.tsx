@@ -1,121 +1,90 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useRef, useEffect, useState } from 'react';
 
-const actions = [
+const executedFlow = [
   { agent: 'Arbitrage Agent #07', action: 'EXECUTE_TRADE', odds: '+2.34%', amount: '842.5 USDC' },
-  { agent: 'Liquidity Agent #12', action: 'ADJUST_POOL', odds: '-1.12%', amount: '12,000 USDC' },
   { agent: 'Hedge Agent #03', action: 'PLACE_HEDGE', odds: '+0.47%', amount: '3,200 USDC' },
 ];
 
-function AnimatedLine({ resolved, blocked }: { resolved: boolean | null; blocked: boolean }) {
-  return (
-    <svg className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2" style={{ zIndex: 0 }}>
-      <line
-        x1="0"
-        y1="0"
-        x2="0"
-        y2="100%"
-        stroke={blocked ? 'var(--color-signal-red)' : 'var(--color-pitch-green)'}
-        strokeWidth={1.5}
-        strokeDasharray="4 3"
-        opacity={resolved === null ? 0.25 : 0.7}
-      />
-    </svg>
-  );
-}
-
-function useOnScreen(ref: React.RefObject<Element | null>, threshold = 0.25) {
-  const [visible, setVisible] = useState(false);
-  useEffect(() => {
-    const el = ref.current;
-    if (!el) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => { if (entry.isIntersecting) { setVisible(true); observer.disconnect(); } },
-      { threshold }
-    );
-    observer.observe(el);
-    return () => observer.disconnect();
-  }, [ref, threshold]);
-  return visible;
-}
+const blockedFlow = [
+  { agent: 'Liquidity Agent #12', action: 'ADJUST_POOL', odds: '-1.12%', amount: '12,000 USDC' },
+];
 
 export function GatePanel() {
   const sectionRef = useRef<HTMLElement>(null);
-  const visible = useOnScreen(sectionRef, 0.3);
-  const [step, setStep] = useState(0);
-  const [resolved, setResolved] = useState<'executed' | 'blocked' | null>(null);
+  const [visible, setVisible] = useState(false);
 
   useEffect(() => {
-    if (!visible || step !== 0) return;
-    const t1 = setTimeout(() => setStep(1), 500);
-    return () => clearTimeout(t1);
-  }, [visible, step]);
-
-  useEffect(() => {
-    if (step === 0 || step > actions.length) return;
-    const t = setTimeout(() => setStep((s) => s + 1), 1400);
-    return () => clearTimeout(t);
-  }, [step]);
-
-  useEffect(() => {
-    if (step !== actions.length + 1) return;
-    const t = setTimeout(() => {
-      setResolved(Math.random() > 0.4 ? 'executed' : 'blocked');
-    }, 600);
-    return () => clearTimeout(t);
-  }, [step]);
-
-  const handleReplay = useCallback(() => {
-    setStep(0);
-    setResolved(null);
-    setTimeout(() => setStep(1), 500);
+    const el = sectionRef.current;
+    if (!el) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setVisible(true); observer.disconnect(); } },
+      { threshold: 0.2 }
+    );
+    observer.observe(el);
+    return () => observer.disconnect();
   }, []);
-
-  const isBlocked = resolved === 'blocked';
 
   return (
     <section
       ref={sectionRef}
-      className="border-b border-[var(--color-line-hairline)] px-6 py-16 sm:py-24"
+      className="border-b border-[var(--color-line-hairline)] px-6 py-16 sm:py-20"
     >
       <div
-        className="mx-auto max-w-3xl text-center transition-all duration-700 ease-out"
+        className="mx-auto max-w-5xl transition-all duration-700 ease-out"
         style={{
           opacity: visible ? 1 : 0,
           transform: visible ? 'translateY(0)' : 'translateY(24px)',
         }}
       >
-        <h2
-          className="mb-2 text-xs font-[400] uppercase tracking-[0.15em] text-[var(--color-text-secondary)]"
-          style={{ fontFamily: 'var(--font-fraunces), serif' }}
-        >
-          Composable Verifiability
-        </h2>
-        <p
-          className="mb-12 text-sm leading-relaxed text-[var(--color-text-secondary)]"
-          style={{ fontFamily: 'var(--font-fraunces), serif', fontWeight: 300 }}
-        >
-          External agents query OddsTrust before acting. The oracle gates execution based on
-          live consistency verification.
-        </p>
+        <div className="mb-10 text-center">
+          <h2
+            className="mb-2 text-xs font-[400] uppercase tracking-[0.15em] text-[var(--color-text-secondary)]"
+            style={{ fontFamily: 'var(--font-fraunces), serif' }}
+          >
+            Composable Verifiability
+          </h2>
+          <p
+            className="mx-auto max-w-xl text-sm leading-relaxed text-[var(--color-text-secondary)]"
+            style={{ fontFamily: 'var(--font-fraunces), serif', fontWeight: 300 }}
+          >
+            External agents query OddsTrust before acting. The oracle gates execution based on
+            live consistency verification.
+          </p>
+        </div>
 
-        <div className="relative mx-auto max-w-lg">
-          <AnimatedLine resolved={resolved ? true : null} blocked={!!isBlocked} />
-
-          <div className="relative space-y-8" style={{ zIndex: 1 }}>
-            {actions.slice(0, Math.min(step, actions.length)).map((act, i) => (
-              <div
-                key={act.agent}
-                className="relative rounded-sm border border-[var(--color-line-hairline)] bg-[var(--color-bg-panel)] p-4 text-left transition-all duration-300"
-                style={{
-                  animation: 'count-up 0.5s ease-out both',
-                  opacity: i < step ? 1 : 0,
-                  transform: i < step ? 'translateY(0)' : 'translateY(12px)',
-                }}
+        <div className="grid gap-8 md:grid-cols-2">
+          {/* EXECUTED */}
+          <div className="relative">
+            <div className="mb-4 text-center">
+              <span
+                className="text-[11px] font-[500] uppercase tracking-wider text-[var(--color-pitch-green)]"
+                style={{ fontFamily: 'var(--font-martian-mono), monospace' }}
               >
-                <div className="flex items-center justify-between">
-                  <div>
+                \u2713 Passed Gate
+              </span>
+            </div>
+            <div className="relative space-y-4">
+              <svg className="absolute left-[19px] top-0 h-full w-px" style={{ zIndex: 0 }}>
+                <line
+                  x1="0" y1="0" x2="0" y2="100%"
+                  stroke="var(--color-pitch-green)"
+                  strokeWidth={1.5}
+                  strokeDasharray="4 3"
+                  opacity={0.5}
+                />
+              </svg>
+              {executedFlow.map((act, i) => (
+                <div
+                  key={act.agent}
+                  className="relative rounded-sm border border-[var(--color-line-hairline)] bg-[var(--color-bg-panel)] p-4 text-left transition-all duration-300"
+                  style={{
+                    animation: visible ? `stagger-fade 0.5s ease-out ${300 + i * 200}ms both` : 'none',
+                    zIndex: 1,
+                  }}
+                >
+                  <div className="flex items-center justify-between">
                     <span
                       className="text-xs text-[var(--color-text-secondary)]"
                       style={{ fontFamily: 'var(--font-fraunces), serif', fontWeight: 400 }}
@@ -128,85 +97,180 @@ export function GatePanel() {
                     >
                       {act.action}
                     </span>
+                    <span
+                      className="text-xs text-[var(--color-text-secondary)]"
+                      style={{ fontFamily: 'var(--font-martian-mono), monospace' }}
+                    >
+                      {act.odds}
+                    </span>
                   </div>
-                  <span
-                    className="text-xs text-[var(--color-text-secondary)]"
-                    style={{ fontFamily: 'var(--font-martian-mono), monospace' }}
-                  >
-                    {act.odds}
-                  </span>
+                  <div className="mt-2 flex items-center justify-between">
+                    <span
+                      className="text-xs text-[var(--color-text-tertiary)]"
+                      style={{ fontFamily: 'var(--font-martian-mono), monospace' }}
+                    >
+                      {act.amount}
+                    </span>
+                    <span
+                      className="flex items-center gap-1 text-[11px]"
+                      style={{
+                        fontFamily: 'var(--font-martian-mono), monospace',
+                        color: 'var(--color-pitch-green)',
+                      }}
+                    >
+                      <span className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--color-pitch-green)]" />
+                      Query OK
+                    </span>
+                  </div>
                 </div>
-                <div className="mt-2 flex items-center justify-between">
-                  <span
-                    className="text-xs text-[var(--color-text-tertiary)]"
-                    style={{ fontFamily: 'var(--font-martian-mono), monospace' }}
-                  >
-                    {act.amount}
-                  </span>
-                  <span
-                    className="flex items-center gap-1 text-[11px]"
-                    style={{
-                      fontFamily: 'var(--font-martian-mono), monospace',
-                      color: 'var(--color-pitch-green)',
-                      opacity: i < step ? 1 : 0,
-                      transition: 'opacity 0.3s ease',
-                    }}
-                  >
-                    <span className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--color-pitch-green)]" />
-                    Query OK
-                  </span>
-                </div>
-              </div>
-            ))}
-
-            {resolved && (
+              ))}
               <div
-                className={`relative rounded-sm border p-5 text-center transition-all duration-[400ms] ${
-                  isBlocked ? 'animate-gate-block' : 'animate-gate-resolve'
-                }`}
+                className="relative rounded-sm border p-5 text-center"
                 style={{
-                  borderColor: isBlocked
-                    ? 'rgba(255,77,77,0.4)'
-                    : 'rgba(57,255,106,0.4)',
-                  backgroundColor: isBlocked
-                    ? 'rgba(255,77,77,0.06)'
-                    : 'rgba(57,255,106,0.06)',
+                  borderColor: 'color-mix(in srgb, var(--color-pitch-green) 40%, transparent)',
+                  backgroundColor: 'color-mix(in srgb, var(--color-pitch-green) 6%, transparent)',
+                  animation: visible ? 'gate-resolve 0.6s ease-out 0.9s both' : 'none',
+                  zIndex: 1,
                 }}
               >
                 <span
                   className="text-lg font-[600] uppercase tracking-wider"
                   style={{
                     fontFamily: 'var(--font-martian-mono), monospace',
-                    color: isBlocked ? 'var(--color-signal-red)' : 'var(--color-pitch-green)',
+                    color: 'var(--color-pitch-green)',
                   }}
                 >
-                  {isBlocked ? '\u26A0 BLOCKED' : '\u2713 EXECUTED'}
+                  \u2713 EXECUTED
                 </span>
                 <p
                   className="mt-2 text-xs text-[var(--color-text-secondary)]"
                   style={{ fontFamily: 'var(--font-fraunces), serif', fontWeight: 300 }}
                 >
-                  {isBlocked
-                    ? 'OddsTrust flagged margin inconsistency — execution halted'
-                    : 'All consistency checks passed — trade executed on-chain'}
+                  All consistency checks passed — trade executed on-chain
                 </p>
-                <div className="mt-4 flex items-center justify-center gap-3">
-                  <span
-                    className="text-[11px] text-[var(--color-text-tertiary)]"
-                    style={{ fontFamily: 'var(--font-martian-mono), monospace' }}
-                  >
-                    proof: 0x7a3f...b91e
-                  </span>
-                  <button
-                    onClick={handleReplay}
-                    className="rounded-sm border border-[var(--color-line-hairline)] px-3 py-1.5 text-[11px] uppercase tracking-wider text-[var(--color-text-tertiary)] transition-colors hover:border-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)]"
-                    style={{ fontFamily: 'var(--font-martian-mono), monospace' }}
-                  >
-                    \u21BB Replay
-                  </button>
-                </div>
+                <span
+                  className="mt-3 inline-block text-[11px] text-[var(--color-text-tertiary)]"
+                  style={{ fontFamily: 'var(--font-martian-mono), monospace' }}
+                >
+                  proof: 0x7a3f...b91e
+                </span>
               </div>
-            )}
+            </div>
+          </div>
+
+          {/* BLOCKED */}
+          <div className="relative">
+            <div className="mb-4 text-center">
+              <span
+                className="text-[11px] font-[500] uppercase tracking-wider text-[var(--color-signal-red)]"
+                style={{ fontFamily: 'var(--font-martian-mono), monospace' }}
+              >
+                \u2717 Blocked by Oracle
+              </span>
+            </div>
+            <div className="relative space-y-4">
+              <svg className="absolute left-[19px] top-0 h-full w-px" style={{ zIndex: 0 }}>
+                <line
+                  x1="0" y1="0" x2="0" y2="100%"
+                  stroke="var(--color-signal-red)"
+                  strokeWidth={1.5}
+                  strokeDasharray="4 3"
+                  opacity={0.5}
+                />
+              </svg>
+              {blockedFlow.map((act, i) => (
+                <div
+                  key={act.agent}
+                  className="relative rounded-sm border p-4 text-left transition-all duration-300"
+                  style={{
+                    borderColor: 'color-mix(in srgb, var(--color-signal-red) 20%, transparent)',
+                    backgroundColor: 'color-mix(in srgb, var(--color-signal-red) 3%, var(--color-bg-panel))',
+                    borderLeft: '3px solid var(--color-signal-red)',
+                    animation: visible ? `stagger-fade 0.5s ease-out ${300 + i * 200}ms both` : 'none',
+                    zIndex: 1,
+                  }}
+                >
+                  <div className="flex items-center justify-between">
+                    <span
+                      className="text-xs text-[var(--color-text-secondary)]"
+                      style={{ fontFamily: 'var(--font-fraunces), serif', fontWeight: 400 }}
+                    >
+                      {act.agent}
+                    </span>
+                    <span
+                      className="ml-3 text-xs text-[var(--color-text-tertiary)]"
+                      style={{ fontFamily: 'var(--font-martian-mono), monospace' }}
+                    >
+                      {act.action}
+                    </span>
+                    <span
+                      className="text-xs text-[var(--color-text-secondary)]"
+                      style={{ fontFamily: 'var(--font-martian-mono), monospace' }}
+                    >
+                      {act.odds}
+                    </span>
+                  </div>
+                  <div className="mt-2 flex items-center justify-between">
+                    <span
+                      className="text-xs text-[var(--color-text-tertiary)]"
+                      style={{ fontFamily: 'var(--font-martian-mono), monospace' }}
+                    >
+                      {act.amount}
+                    </span>
+                    <span
+                      className="flex items-center gap-1 text-[11px]"
+                      style={{
+                        fontFamily: 'var(--font-martian-mono), monospace',
+                        color: 'var(--color-signal-red)',
+                      }}
+                    >
+                      <span className="inline-block h-1.5 w-1.5 rounded-full bg-[var(--color-signal-red)]" />
+                      Flagged
+                    </span>
+                  </div>
+                  <div className="mt-2 rounded-sm px-2 py-1 text-[10px]"
+                    style={{
+                      backgroundColor: 'color-mix(in srgb, var(--color-signal-amber) 8%, transparent)',
+                      color: 'var(--color-signal-amber)',
+                      fontFamily: 'var(--font-martian-mono), monospace',
+                    }}
+                  >
+                    Cause: England vs Spain margin anomaly detected (0.47%)
+                  </div>
+                </div>
+              ))}
+              <div
+                className="relative rounded-sm border p-5 text-center"
+                style={{
+                  borderColor: 'color-mix(in srgb, var(--color-signal-red) 40%, transparent)',
+                  backgroundColor: 'color-mix(in srgb, var(--color-signal-red) 6%, transparent)',
+                  animation: visible ? 'gate-block 0.6s ease-out 0.7s both' : 'none',
+                  zIndex: 1,
+                }}
+              >
+                <span
+                  className="text-lg font-[600] uppercase tracking-wider"
+                  style={{
+                    fontFamily: 'var(--font-martian-mono), monospace',
+                    color: 'var(--color-signal-red)',
+                  }}
+                >
+                  \u2717 BLOCKED
+                </span>
+                <p
+                  className="mt-2 text-xs text-[var(--color-text-secondary)]"
+                  style={{ fontFamily: 'var(--font-fraunces), serif', fontWeight: 300 }}
+                >
+                  Consistency check failed — trade rejected on-chain
+                </p>
+                <span
+                  className="mt-3 inline-block text-[11px] text-[var(--color-text-tertiary)]"
+                  style={{ fontFamily: 'var(--font-martian-mono), monospace' }}
+                >
+                  proof: 0xd4e8...a31c
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </div>

@@ -10,25 +10,53 @@ interface FeedEntry {
   hash: string;
 }
 
-const templates: Omit<FeedEntry, 'id'>[] = [
-  { ts: '', type: 'check', message: 'Consistency check passed: Brazil vs Argentina', hash: '7x3k...a9f2' },
-  { ts: '', type: 'check', message: 'Margin validation: Germany vs France', hash: 'b4d1...e7c3' },
-  { ts: '', type: 'inconsistency', message: 'Margin anomaly detected: England vs Spain', hash: 'f8a2...b1d4' },
-  { ts: '', type: 'verify', message: 'On-chain proof committed to slot 310442894', hash: 'c5e9...f2a7' },
-  { ts: '', type: 'check', message: 'Consistency check passed: Portugal vs Netherlands', hash: 'a1b2...c3d4' },
-  { ts: '', type: 'inconsistency', message: 'Odds deviation > threshold: Belgium vs Morocco', hash: 'e5f6...g7h8' },
-  { ts: '', type: 'verify', message: 'Oracle state root updated on-chain', hash: 'i9j0...k1l2' },
-  { ts: '', type: 'check', message: 'Consistency check passed: Senegal vs Japan', hash: 'm3n4...o5p6' },
-  { ts: '', type: 'inconsistency', message: 'Suspicious margin movement: Australia vs Denmark', hash: 'q7r8...s9t0' },
+const templates: Omit<FeedEntry, 'id' | 'ts'>[] = [
+  { type: 'check', message: 'Consistency check passed: Brazil vs Argentina', hash: '7x3k...a9f2' },
+  { type: 'check', message: 'Margin validation: Germany vs France', hash: 'b4d1...e7c3' },
+  { type: 'inconsistency', message: 'Margin anomaly detected: England vs Spain', hash: 'f8a2...b1d4' },
+  { type: 'verify', message: 'On-chain proof committed to slot 310442894', hash: 'c5e9...f2a7' },
+  { type: 'check', message: 'Consistency check passed: Portugal vs Netherlands', hash: 'a1b2...c3d4' },
+  { type: 'inconsistency', message: 'Odds deviation > threshold: Belgium vs Morocco', hash: 'e5f6...g7h8' },
+  { type: 'verify', message: 'Oracle state root updated on-chain', hash: 'i9j0...k1l2' },
+  { type: 'check', message: 'Consistency check passed: Senegal vs Japan', hash: 'm3n4...o5p6' },
+  { type: 'inconsistency', message: 'Suspicious margin movement: Australia vs Denmark', hash: 'q7r8...s9t0' },
+  { type: 'check', message: 'Market spread validation: Italy vs Croatia', hash: 'u1v2...w3x4' },
+  { type: 'verify', message: 'Verification proof generated for matchday 3', hash: 'y5z6...a7b8' },
+  { type: 'check', message: 'Consistency check passed: USA vs Mexico', hash: 'c9d0...e1f2' },
+  { type: 'inconsistency', message: 'Cross-market discrepancy: Brazil futures', hash: 'g3h4...i5j6' },
+  { type: 'verify', message: 'Slots 310442900-310442910 verified', hash: 'k7l8...m9n0' },
+  { type: 'check', message: 'Margin recalibration: England vs Spain', hash: 'o1p2...q3r4' },
+  { type: 'inconsistency', message: 'Liquidity gap flagged: Portugal match', hash: 's5t6...u7v8' },
+  { type: 'verify', message: 'Oracle attestation broadcast to validators', hash: 'w9x0...y1z2' },
+  { type: 'check', message: 'Consistency check passed: Belgium vs Morocco', hash: 'a3b4...c5d6' },
+  { type: 'inconsistency', message: 'Volatility spike detected: Germany market', hash: 'e7f8...g9h0' },
+  { type: 'verify', message: 'Proof aggregation cycle completed', hash: 'i1j2...k3l4' },
 ];
 
-function generateEntry(id: number): FeedEntry {
-  const tpl = templates[id % templates.length];
-  return {
-    ...tpl,
-    id,
-    ts: new Date().toISOString().replace('T', ' ').slice(11, 19),
-  };
+function shuffle<T>(arr: T[]): T[] {
+  const a = [...arr];
+  for (let i = a.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [a[i], a[j]] = [a[j], a[i]];
+  }
+  return a;
+}
+
+let shuffledTemplates = shuffle(templates);
+let templateIndex = 0;
+
+function nextTemplate() {
+  const tpl = shuffledTemplates[templateIndex % shuffledTemplates.length];
+  templateIndex++;
+  if (templateIndex >= shuffledTemplates.length) {
+    shuffledTemplates = shuffle(templates);
+    templateIndex = 0;
+  }
+  return tpl;
+}
+
+function now() {
+  return new Date().toISOString().replace('T', ' ').slice(11, 19);
 }
 
 const feedColors = {
@@ -43,22 +71,10 @@ const feedLabels = {
   verify: 'PROOF',
 };
 
-const feedBg = {
-  check: 'rgba(57,255,106,0.04)',
-  inconsistency: 'rgba(255,177,60,0.04)',
-  verify: 'rgba(78,93,85,0.04)',
-};
-
-const feedBorder = {
-  check: 'rgba(57,255,106,0.08)',
-  inconsistency: 'rgba(255,177,60,0.08)',
-  verify: 'rgba(78,93,85,0.08)',
-};
-
 const feedBadgeBg = {
-  check: 'rgba(57,255,106,0.12)',
-  inconsistency: 'rgba(255,177,60,0.12)',
-  verify: 'rgba(78,93,85,0.15)',
+  check: 'color-mix(in srgb, var(--color-pitch-green) 12%, transparent)',
+  inconsistency: 'color-mix(in srgb, var(--color-signal-amber) 12%, transparent)',
+  verify: 'color-mix(in srgb, var(--color-text-tertiary) 15%, transparent)',
 };
 
 const typeIcons = {
@@ -67,7 +83,7 @@ const typeIcons = {
   verify: '\u25C8',
 };
 
-export function ProofFeed() {
+export function ProofFeed({ fullPage = false }: { fullPage?: boolean }) {
   const sectionRef = useRef<HTMLElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const idRef = useRef(6);
@@ -79,21 +95,29 @@ export function ProofFeed() {
     if (!el) return;
     const observer = new IntersectionObserver(
       ([entry]) => { if (entry.isIntersecting) { setVisible(true); observer.disconnect(); } },
-      { threshold: 0.15 }
+      { threshold: fullPage ? 0 : 0.15 }
     );
+    if (fullPage) setVisible(true);
     observer.observe(el);
     return () => observer.disconnect();
-  }, []);
+  }, [fullPage]);
 
   const [entries, setEntries] = useState<FeedEntry[]>(() =>
-    Array.from({ length: 6 }, (_, i) => generateEntry(i))
+    Array.from({ length: 6 }, (_, i) => ({
+      ...nextTemplate(),
+      id: i,
+      ts: now(),
+    }))
   );
 
   const addEntry = useCallback(() => {
     if (paused) return;
     const id = idRef.current++;
-    setEntries((current) => [generateEntry(id), ...current.slice(0, 49)]);
-  }, [paused]);
+    setEntries((current) => [
+      { ...nextTemplate(), id, ts: now() },
+      ...current.slice(0, fullPage ? 99 : 49),
+    ]);
+  }, [paused, fullPage]);
 
   useEffect(() => {
     const interval = setInterval(addEntry, 4000);
@@ -111,7 +135,7 @@ export function ProofFeed() {
   return (
     <section
       ref={sectionRef}
-      className="border-b border-[var(--color-line-hairline)] px-6 py-10"
+      className={`border-b border-[var(--color-line-hairline)] ${fullPage ? 'px-6 py-10' : 'px-6 py-10'}`}
     >
       <div
         className="mx-auto max-w-4xl transition-all duration-700 ease-out"
@@ -166,23 +190,16 @@ export function ProofFeed() {
 
           <div
             ref={scrollRef}
-            className="max-h-[360px] overflow-y-auto"
+            className={`overflow-y-auto ${fullPage ? 'max-h-[600px]' : 'max-h-[360px]'}`}
             style={{
               scrollbarWidth: 'thin',
               scrollbarColor: 'var(--color-line-hairline) transparent',
             }}
           >
             <style>{`
-              .proof-feed-scroll::-webkit-scrollbar {
-                width: 4px;
-              }
-              .proof-feed-scroll::-webkit-scrollbar-track {
-                background: transparent;
-              }
-              .proof-feed-scroll::-webkit-scrollbar-thumb {
-                background: var(--color-line-hairline);
-                border-radius: 2px;
-              }
+              .proof-feed-scroll::-webkit-scrollbar { width: 4px; }
+              .proof-feed-scroll::-webkit-scrollbar-track { background: transparent; }
+              .proof-feed-scroll::-webkit-scrollbar-thumb { background: var(--color-line-hairline); border-radius: 2px; }
             `}</style>
             <div className="proof-feed-scroll">
               {entries.map((entry, i) => (
@@ -209,7 +226,7 @@ export function ProofFeed() {
                   >
                     {typeIcons[entry.type]}
                   </span>
-                  <span className="flex-1 truncate text-[var(--color-text-primary)] group-hover:text-[var(--color-text-secondary)] transition-colors">
+                  <span className="flex-1 truncate text-[var(--color-text-primary)] transition-colors group-hover:text-[var(--color-text-secondary)]">
                     {entry.message}
                   </span>
                   <span

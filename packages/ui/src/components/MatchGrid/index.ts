@@ -1,1 +1,1 @@
-export { MatchGrid } from './MatchGrid';
+export { MatchGrid, MatchCard, fixtures } from './MatchGrid';

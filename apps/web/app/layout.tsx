@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Fraunces, Martian_Mono } from "next/font/google";
+import { Background, TopStrip } from "@oddtrust/ui";
 import "./globals.css";
 
 const fraunces = Fraunces({
@@ -36,9 +37,15 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${fraunces.variable} ${martianMono.variable} bg-[var(--color-bg-void)]`}
+      className={`${fraunces.variable} ${martianMono.variable}`}
     >
-      <body className="min-h-screen">{children}</body>
+      <body className="min-h-screen antialiased">
+        <Background />
+        <div className="mx-auto min-h-screen max-w-6xl border-x border-[var(--color-line-hairline)] bg-[var(--color-bg-void)]">
+          <TopStrip />
+          {children}
+        </div>
+      </body>
     </html>
   );
 }

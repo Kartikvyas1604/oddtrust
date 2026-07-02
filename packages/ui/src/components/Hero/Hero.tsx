@@ -39,11 +39,11 @@ export function Hero() {
       <div className="mx-auto max-w-4xl text-center">
         <p
           className="mb-2 text-xs font-[400] uppercase tracking-[0.15em] text-[var(--color-text-secondary)]"
-          style={{ fontFamily: 'var(--font-fraunces), serif', animation: 'count-up 0.6s ease-out 300ms both' }}
+          style={{ fontFamily: 'var(--font-fraunces), serif', animation: 'stagger-fade 0.5s ease-out 300ms both' }}
         >
           Tournament Trust Score
         </p>
-        <div style={{ animation: 'count-up 0.6s ease-out 400ms both' }}>
+        <div style={{ animation: 'stagger-fade 0.5s ease-out 400ms both' }}>
           <span
             className="block text-7xl leading-none font-[600] sm:text-8xl md:text-[160px]"
             style={{
@@ -51,7 +51,7 @@ export function Hero() {
               color: 'var(--color-trophy-gold)',
               letterSpacing: '-0.04em',
               fontVariationSettings: '"wght" 600',
-              textShadow: '0 0 60px rgba(212,175,106,0.15)',
+              textShadow: '0 0 60px color-mix(in srgb, var(--color-trophy-gold) 15%, transparent)',
             }}
           >
             {score}
@@ -59,27 +59,35 @@ export function Hero() {
           </span>
         </div>
         <div
-          className="mx-auto mt-8 h-px w-32 bg-gradient-to-r from-transparent via-[var(--color-trophy-gold)]/30 to-transparent"
-          style={{ animation: 'count-up 0.6s ease-out 500ms both' }}
+          className="mx-auto mt-8 h-px w-32"
+          style={{
+            background: 'linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--color-trophy-gold) 30%, transparent) 50%, transparent 100%)',
+            animation: 'stagger-fade 0.5s ease-out 500ms both',
+          }}
         />
         <div
-          className="mt-8 flex flex-wrap justify-center gap-x-10 gap-y-4"
-          style={{ animation: 'count-up 0.6s ease-out 600ms both' }}
+          className="mx-auto mt-8 flex flex-wrap justify-center gap-8 sm:gap-12"
+          style={{ animation: 'stagger-fade 0.5s ease-out 600ms both' }}
         >
-          {stats.map((stat) => (
-            <div key={stat.label} className="text-center">
-              <span
-                className="block text-2xl font-[500] text-[var(--color-text-primary)]"
-                style={{ fontFamily: 'var(--font-martian-mono), monospace' }}
-              >
-                {stat.value.toLocaleString()}
-              </span>
-              <span
-                className="text-xs text-[var(--color-text-secondary)]"
-                style={{ fontFamily: 'var(--font-fraunces), serif', fontWeight: 400 }}
-              >
-                {stat.label}
-              </span>
+          {stats.map((stat, i) => (
+            <div key={stat.label} className="flex items-center gap-4">
+              <div className="text-center">
+                <span
+                  className="block text-2xl font-[500] text-[var(--color-text-primary)]"
+                  style={{ fontFamily: 'var(--font-martian-mono), monospace' }}
+                >
+                  {stat.value.toLocaleString()}
+                </span>
+                <span
+                  className="text-xs text-[var(--color-text-secondary)]"
+                  style={{ fontFamily: 'var(--font-fraunces), serif', fontWeight: 400 }}
+                >
+                  {stat.label}
+                </span>
+              </div>
+              {i < stats.length - 1 && (
+                <span className="hidden h-8 w-px bg-[var(--color-line-hairline)] sm:block" />
+              )}
             </div>
           ))}
         </div>
