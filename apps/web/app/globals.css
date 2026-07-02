@@ -1,26 +1,84 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+  --color-bg-void: #0A0D0B;
+  --color-bg-panel: #121815;
+  --color-bg-raised: #1A2320;
+  --color-line-hairline: #253029;
+  --color-pitch-green: #39FF6A;
+  --color-pitch-green-dim: #1E7A3E;
+  --color-signal-amber: #FFB13C;
+  --color-signal-red: #FF4D4D;
+  --color-trophy-gold: #D4AF6A;
+  --color-text-primary: #E9F2EC;
+  --color-text-secondary: #8FA398;
+  --color-text-tertiary: #4E5D55;
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-display: var(--font-fraunces), serif;
+  --font-mono: var(--font-martian-mono), monospace;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background-color: var(--color-bg-void);
+  color: var(--color-text-primary);
+  font-family: var(--font-display);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@keyframes pulse-dot {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+@keyframes count-up {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes sweep-glow {
+  0% { transform: translateX(-100%); }
+  50% { transform: translateX(100%); }
+  100% { transform: translateX(-100%); }
+}
+
+@keyframes feed-enter {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes gate-resolve {
+  0% { background-color: transparent; }
+  50% { background-color: rgba(57, 255, 106, 0.08); }
+  100% { background-color: transparent; }
+}
+
+@keyframes gate-block {
+  0% { background-color: transparent; }
+  50% { background-color: rgba(255, 77, 77, 0.08); }
+  100% { background-color: transparent; }
+}
+
+.animate-pulse-dot {
+  animation: pulse-dot 2s ease-in-out infinite;
+}
+
+.animate-sweep-glow {
+  animation: sweep-glow 10s ease-in-out infinite;
+}
+
+.animate-feed-enter {
+  animation: feed-enter 0.2s ease-out;
+}
+
+.animate-gate-resolve {
+  animation: gate-resolve 0.4s ease-out;
+}
+
+.animate-gate-block {
+  animation: gate-block 0.4s ease-out;
+}
+
+.animate-count-up {
+  animation: count-up 0.6s ease-out forwards;
 }
