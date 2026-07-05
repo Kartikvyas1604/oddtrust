@@ -53,7 +53,7 @@ export function ProofFeed() {
   }, []);
 
   return (
-    <section className="pt-8">
+    <section>
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-sm font-mono-data text-text-secondary uppercase tracking-[0.1em]">
           Proof Feed

@@ -13,8 +13,7 @@ export default function Home() {
       <TopStrip />
       <Hero />
 
-      {/* Network Health */}
-      <section className="py-12">
+      <section className="py-12 border-t border-line-hairline">
         <h2 className="text-sm font-mono-data text-text-secondary uppercase tracking-[0.1em] mb-4">
           Network Health
         </h2>
@@ -28,11 +27,18 @@ export default function Home() {
         </div>
       </section>
 
-      <MatchGrid preview />
-      <GatePanel />
-      <ProofFeed />
+      <section className="py-12 border-t border-line-hairline">
+        <MatchGrid preview />
+      </section>
 
-      {/* Footer */}
+      <section className="border-t border-line-hairline">
+        <GatePanel />
+      </section>
+
+      <section className="py-12 border-t border-line-hairline">
+        <ProofFeed />
+      </section>
+
       <footer className="py-8 mt-8 border-t border-line-hairline">
         <div className="flex flex-col items-center justify-between gap-3 sm:flex-row">
           <div className="flex items-center gap-3">
