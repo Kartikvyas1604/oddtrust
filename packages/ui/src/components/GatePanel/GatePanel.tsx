@@ -84,7 +84,7 @@ export function GatePanel() {
   return (
     <section
       ref={ref}
-      className={`py-12 transition-all duration-500 ${
+      className={`transition-all duration-500 ${
         visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-6"
       }`}
     >

@@ -36,7 +36,7 @@ function CountUp({
 
 export function Hero() {
   return (
-    <section className="py-16 md:py-20 text-center animate-fade-in opacity-0 [animation-delay:300ms] [animation-fill-mode:forwards]">
+    <section className="py-12 text-center animate-fade-in opacity-0 [animation-delay:300ms] [animation-fill-mode:forwards]">
       {/* tournament trust score */}
       <p className="text-xs font-mono-data text-text-secondary uppercase tracking-[0.12em] mb-2">
         Tournament Trust Score
