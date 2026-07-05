@@ -14,15 +14,15 @@ export function Nav() {
   const pathname = usePathname();
 
   return (
-    <header className="flex items-center justify-between gap-6 py-4 border-b border-line-hairline animate-fade-up opacity-0">
+    <header className="grid grid-cols-3 items-center py-4 border-b border-line-hairline animate-fade-up opacity-0">
       <Link
         href="/"
-        className="shrink-0 text-lg font-[500] tracking-tight text-text-primary hover:text-pitch-green transition-colors no-underline"
+        className="justify-self-start text-lg font-[500] tracking-tight text-text-primary hover:text-pitch-green transition-colors no-underline"
       >
         Odds<span className="text-pitch-green">Trust</span>
       </Link>
 
-      <nav className="flex items-center gap-6 overflow-x-auto">
+      <nav className="justify-self-center flex items-center gap-6">
         {links.map((l) => {
           const active = l.href === "/matches" ? pathname.startsWith("/matches") : pathname === l.href;
           return (
@@ -41,7 +41,7 @@ export function Nav() {
         })}
       </nav>
 
-      <div className="flex items-center gap-4 font-mono shrink-0">
+      <div className="justify-self-end flex items-center gap-4 font-mono">
         <div className="flex items-center gap-1.5 text-xs text-pitch-green">
           <span className="inline-block w-1.5 h-1.5 rounded-full bg-pitch-green animate-pulse-dot" />
           <span className="hidden sm:inline">Oracle Active</span>
