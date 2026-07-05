@@ -1,5 +1,8 @@
+"use client";
+
 import React from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 const navLinks = [
   { label: "Oracle", href: "/oracle" },
@@ -9,6 +12,8 @@ const navLinks = [
 ];
 
 export function TopStrip() {
+  const pathname = usePathname();
+
   return (
     <header className="flex flex-wrap items-center justify-between gap-3 py-3 border-b border-line-hairline">
       {/* wordmark */}
@@ -25,7 +30,11 @@ export function TopStrip() {
           <Link
             key={link.href}
             href={link.href}
-            className="text-sm text-text-secondary hover:text-text-primary transition-colors duration-200 no-underline whitespace-nowrap"
+            className={`text-sm transition-colors duration-200 no-underline whitespace-nowrap ${
+              pathname === link.href
+                ? "text-text-primary"
+                : "text-text-secondary hover:text-text-primary"
+            }`}
           >
             {link.label}
           </Link>
