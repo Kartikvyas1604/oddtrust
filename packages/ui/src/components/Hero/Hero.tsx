@@ -24,7 +24,7 @@ function CountUp({ end, duration, suffix = "" }: { end: number; duration: number
 
 export function Hero() {
   return (
-    <section className="py-16 text-center animate-fade-up opacity-0">
+    <section className="relative py-16 text-center animate-fade-up opacity-0">
       <p className="text-xs font-mono text-text-secondary uppercase tracking-[0.15em] mb-3">
         Tournament Trust Score
       </p>
