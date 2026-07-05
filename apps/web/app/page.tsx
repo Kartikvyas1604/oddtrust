@@ -1,4 +1,4 @@
-import { TopStrip, Hero, MatchGrid, GatePanel, ProofFeed } from "@oddtrust/ui";
+import { Hero, MatchGrid, GatePanel, ProofFeed } from "@oddtrust/ui";
 
 const networkStats = [
   { label: "Total Checks", value: "24,598" },
@@ -10,7 +10,6 @@ const networkStats = [
 export default function Home() {
   return (
     <>
-      <TopStrip />
       <Hero />
 
       <section className="py-12 border-t border-line-hairline">

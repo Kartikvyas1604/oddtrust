@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Fraunces, Martian_Mono } from "next/font/google";
 import "./globals.css";
-import { Background } from "@oddtrust/ui";
+import { Background, TopStrip } from "@oddtrust/ui";
 
 const fraunces = Fraunces({
   subsets: ["latin"],
@@ -34,6 +34,7 @@ export default function RootLayout({
       <body>
         <Background />
         <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4 min-h-screen">
+          <TopStrip />
           {children}
         </div>
       </body>

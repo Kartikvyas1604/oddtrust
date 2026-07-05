@@ -15,22 +15,22 @@ export function TopStrip() {
   const pathname = usePathname();
 
   return (
-    <header className="flex flex-wrap items-center justify-between gap-3 py-3 border-b border-line-hairline">
+    <header className="flex items-center justify-between gap-6 py-3 border-b border-line-hairline">
       {/* wordmark */}
       <Link
         href="/"
-        className="text-lg font-[500] tracking-tight text-text-primary hover:text-pitch-green transition-colors duration-200 no-underline"
+        className="shrink-0 text-lg font-[500] tracking-tight text-text-primary hover:text-pitch-green transition-colors duration-200 no-underline"
       >
         Odds<span className="text-pitch-green">Trust</span>
       </Link>
 
       {/* nav links */}
-      <nav className="flex items-center gap-5 overflow-x-auto">
+      <nav className="flex items-center gap-6 overflow-x-auto">
         {navLinks.map((link) => (
           <Link
             key={link.href}
             href={link.href}
-            className={`text-sm transition-colors duration-200 no-underline whitespace-nowrap ${
+            className={`shrink-0 text-sm transition-colors duration-200 no-underline whitespace-nowrap ${
               pathname === link.href
                 ? "text-text-primary"
                 : "text-text-secondary hover:text-text-primary"
@@ -42,12 +42,13 @@ export function TopStrip() {
       </nav>
 
       {/* oracle status + slot */}
-      <div className="flex items-center gap-4 font-mono-data">
+      <div className="flex items-center gap-4 font-mono-data shrink-0">
         <div className="flex items-center gap-1.5 text-xs text-pitch-green">
           <span className="inline-block w-1.5 h-1.5 rounded-full bg-pitch-green animate-pulse-dot" />
-          Oracle Active
+          <span className="hidden sm:inline">Oracle Active</span>
+          <span className="sm:hidden">Live</span>
         </div>
-        <span className="text-xs text-text-tertiary">
+        <span className="hidden sm:block text-xs text-text-tertiary">
           Slot 284,391,882
         </span>
       </div>
