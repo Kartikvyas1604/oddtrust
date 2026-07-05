@@ -94,7 +94,7 @@ export function GatePanel() {
       <p className="text-xs text-text-tertiary leading-relaxed max-w-lg mb-6">
         External agents audit trust data before execution. Each gate independently resolves a transaction based on live oracle state.
       </p>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-2xl">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {agents.map((a, i) => (
           <GateRow key={a.id} agent={a} delay={i * 100} />
         ))}
