@@ -36,12 +36,12 @@ export function MatchCard({ fixture }: { fixture: Fixture }) {
       href={`/matches/${fixture.id}`}
       className="group block bg-bg-panel border border-line-hairline rounded-lg p-4 no-underline transition-all duration-120 hover:-translate-y-0.5 hover:bg-bg-raised"
     >
-      <div className="flex items-center justify-between gap-2 mb-2">
-        <span className="text-sm text-text-primary font-[500]">
+      <div className="flex items-center justify-between gap-2 mb-2 min-w-0">
+        <span className="text-sm text-text-primary font-[500] truncate min-w-0">
           {fixture.homeTeam}
         </span>
-        <span className="text-xs text-text-tertiary font-mono-data">vs</span>
-        <span className="text-sm text-text-primary font-[500]">
+        <span className="shrink-0 text-xs text-text-tertiary font-mono-data">vs</span>
+        <span className="text-sm text-text-primary font-[500] truncate min-w-0 text-right">
           {fixture.awayTeam}
         </span>
       </div>
