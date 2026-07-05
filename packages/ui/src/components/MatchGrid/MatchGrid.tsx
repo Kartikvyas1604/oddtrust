@@ -1,178 +1,94 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
+import React from "react";
+import Link from "next/link";
 
-export interface Fixture {
-  id: number;
-  home: string;
-  away: string;
+type Status = "consistent" | "flagged" | "blocked";
+
+interface Fixture {
+  id: string;
+  homeTeam: string;
+  awayTeam: string;
+  status: Status;
   margin: number;
-  status: 'consistent' | 'flagged';
-  checks: number;
   lastChecked: string;
 }
 
 export const fixtures: Fixture[] = [
-  { id: 1, home: 'Brazil', away: 'Argentina', margin: 2.34, status: 'consistent', checks: 42, lastChecked: '07:29:41' },
-  { id: 2, home: 'Germany', away: 'France', margin: -1.12, status: 'consistent', checks: 38, lastChecked: '07:28:15' },
-  { id: 3, home: 'England', away: 'Spain', margin: 0.47, status: 'flagged', checks: 51, lastChecked: '07:30:02' },
-  { id: 4, home: 'Portugal', away: 'Netherlands', margin: 3.01, status: 'consistent', checks: 29, lastChecked: '07:27:44' },
-  { id: 5, home: 'Italy', away: 'Croatia', margin: -0.88, status: 'consistent', checks: 35, lastChecked: '07:29:10' },
-  { id: 6, home: 'Belgium', away: 'Morocco', margin: 5.62, status: 'flagged', checks: 47, lastChecked: '07:28:58' },
-  { id: 7, home: 'Senegal', away: 'Japan', margin: 1.23, status: 'consistent', checks: 23, lastChecked: '07:26:30' },
-  { id: 8, home: 'USA', away: 'Mexico', margin: -2.45, status: 'consistent', checks: 31, lastChecked: '07:29:22' },
-  { id: 9, home: 'Australia', away: 'Denmark', margin: 0.09, status: 'flagged', checks: 44, lastChecked: '07:27:03' },
+  { id: "1", homeTeam: "FC Zenith", awayTeam: "Atlas United", status: "consistent", margin: 94.2, lastChecked: "12s ago" },
+  { id: "2", homeTeam: "Stormhaven", awayTeam: "Northgate", status: "flagged", margin: 67.8, lastChecked: "23s ago" },
+  { id: "3", homeTeam: "Ironbound FC", awayTeam: "Silverlake", status: "consistent", margin: 91.5, lastChecked: "5s ago" },
+  { id: "4", homeTeam: "Crystal Palace", awayTeam: "Bridge City", status: "blocked", margin: 22.1, lastChecked: "47s ago" },
+  { id: "5", homeTeam: "Red Star", awayTeam: "Blue United", status: "consistent", margin: 96.0, lastChecked: "2s ago" },
+  { id: "6", homeTeam: "Eastside FC", awayTeam: "Westend Athletic", status: "flagged", margin: 58.4, lastChecked: "34s ago" },
 ];
 
-function StatusBadge({ status }: { status: 'consistent' | 'flagged' }) {
-  const isConsistent = status === 'consistent';
-  return (
-    <span
-      className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-[500] uppercase tracking-wider"
-      style={{
-        fontFamily: 'var(--font-fraunces), serif',
-        backgroundColor: isConsistent
-          ? 'color-mix(in srgb, var(--color-pitch-green) 8%, transparent)'
-          : 'color-mix(in srgb, var(--color-signal-amber) 8%, transparent)',
-        color: isConsistent ? 'var(--color-pitch-green)' : 'var(--color-signal-amber)',
-        border: `1px solid ${
-          isConsistent
-            ? 'color-mix(in srgb, var(--color-pitch-green) 20%, transparent)'
-            : 'color-mix(in srgb, var(--color-signal-amber) 20%, transparent)'
-        }`,
-      }}
-    >
-      <span
-        className={`inline-block h-1.5 w-1.5 rounded-full ${isConsistent ? 'bg-[var(--color-pitch-green)]' : 'bg-[var(--color-signal-amber)]'}`}
-      />
-      {isConsistent ? 'Consistent' : 'Flagged'}
-    </span>
-  );
-}
+const statusConfig: Record<Status, { label: string; color: string; dot: string }> = {
+  consistent: { label: "Consistent", color: "text-pitch-green", dot: "bg-pitch-green" },
+  flagged: { label: "Flagged", color: "text-signal-amber", dot: "bg-signal-amber" },
+  blocked: { label: "Blocked", color: "text-signal-red", dot: "bg-signal-red" },
+};
 
-export function MatchCard({ match, index }: { match: Fixture; index: number }) {
-  const isFlagged = match.status === 'flagged';
-
+export function MatchCard({ fixture }: { fixture: Fixture }) {
+  const cfg = statusConfig[fixture.status];
   return (
     <Link
-      href={`/matches/${match.id}`}
-      className="group block rounded-sm transition-all duration-100 ease-linear will-change-transform hover:-translate-y-0.5 hover:shadow-lg hover:shadow-black/40"
-      style={{ animation: `stagger-fade 0.5s ease-out ${300 + index * 60}ms both` }}
+      key={fixture.id}
+      href={`/matches/${fixture.id}`}
+      className="group block bg-bg-panel border border-line-hairline rounded-lg p-4 no-underline transition-all duration-120 hover:-translate-y-0.5 hover:bg-bg-raised"
     >
-      <div
-        className="rounded-sm border p-4 transition-all duration-100"
-        style={{
-          borderColor: isFlagged
-            ? 'color-mix(in srgb, var(--color-signal-amber) 30%, transparent)'
-            : 'var(--color-line-hairline)',
-          backgroundColor: isFlagged
-            ? 'color-mix(in srgb, var(--color-signal-amber) 3%, var(--color-bg-panel))'
-            : 'var(--color-bg-panel)',
-          borderLeft: isFlagged ? '3px solid var(--color-signal-amber)' : '3px solid transparent',
-          ...(isFlagged ? {} : { borderLeft: '3px solid transparent' }),
-        }}
-      >
-        <div className="mb-3 flex items-center justify-between">
-          <StatusBadge status={match.status} />
-          <span
-            className="text-xs tabular-nums text-[var(--color-text-tertiary)]"
-            style={{ fontFamily: 'var(--font-martian-mono), monospace' }}
-          >
-            Checks: {match.checks}
-          </span>
-        </div>
-
-        <div className="flex items-center justify-between">
-          <span
-            className="text-sm font-[500] text-[var(--color-text-primary)]"
-            style={{ fontFamily: 'var(--font-fraunces), serif' }}
-          >
-            {match.home}
-          </span>
-          <span
-            className="text-sm text-[var(--color-text-tertiary)]"
-            style={{ fontFamily: 'var(--font-fraunces), serif', fontWeight: 300 }}
-          >
-            v
-          </span>
-          <span
-            className="text-sm font-[500] text-[var(--color-text-primary)]"
-            style={{ fontFamily: 'var(--font-fraunces), serif' }}
-          >
-            {match.away}
-          </span>
-        </div>
-
-        <div className="mt-3 flex items-center justify-between border-t border-[var(--color-line-hairline)] pt-3">
-          <span
-            className="text-[11px] text-[var(--color-text-secondary)]"
-            style={{ fontFamily: 'var(--font-fraunces), serif', fontWeight: 400 }}
-          >
-            Margin
-          </span>
-          <div className="flex items-center gap-2">
-            <span
-              className="text-[11px] text-[var(--color-text-tertiary)]"
-              style={{ fontFamily: 'var(--font-martian-mono), monospace' }}
-            >
-              Last: {match.lastChecked}
-            </span>
-            <span
-              className="text-sm font-[500] tabular-nums"
-              style={{
-                fontFamily: 'var(--font-martian-mono), monospace',
-                color: isFlagged
-                  ? 'var(--color-signal-amber)'
-                  : match.margin >= 0
-                    ? 'var(--color-pitch-green)'
-                    : 'var(--color-signal-red)',
-              }}
-            >
-              {match.margin >= 0 ? '+' : ''}{match.margin.toFixed(2)}%
-            </span>
-          </div>
-        </div>
+      <div className="flex items-center justify-between gap-2 mb-2">
+        <span className="text-sm text-text-primary font-[500]">
+          {fixture.homeTeam}
+        </span>
+        <span className="text-xs text-text-tertiary font-mono-data">vs</span>
+        <span className="text-sm text-text-primary font-[500]">
+          {fixture.awayTeam}
+        </span>
       </div>
+      <div className="flex items-center justify-between">
+        <span className={`inline-flex items-center gap-1.5 text-xs font-mono-data ${cfg.color}`}>
+          <span className={`inline-block w-1.5 h-1.5 rounded-full ${cfg.dot}`} />
+          {cfg.label}
+        </span>
+        <span className="font-mono-data text-xs text-text-primary">
+          {fixture.margin}%
+        </span>
+      </div>
+      <p className="text-[10px] font-mono-data text-text-tertiary mt-2">
+        Checked {fixture.lastChecked}
+      </p>
     </Link>
   );
 }
 
-export function MatchGrid({ preview = false }: { preview?: boolean }) {
-  const displayFixtures = preview ? fixtures.slice(0, 5) : fixtures;
-
+export function MatchGrid({ preview }: { preview?: boolean }) {
+  const displayFixtures = preview ? fixtures.slice(0, 3) : fixtures;
   return (
-    <section className="border-b border-[var(--color-line-hairline)] px-6 py-10">
-      <div className="mx-auto max-w-4xl">
-        <div className="mb-6 flex items-center justify-between">
-          <div>
-            <h2
-              className="mb-1 text-sm font-[500] uppercase tracking-[0.12em] text-[var(--color-text-secondary)]"
-              style={{ fontFamily: 'var(--font-fraunces), serif' }}
-            >
-              {preview ? 'Live Matches' : 'Live Match Grid'}
-            </h2>
-            <p
-              className="text-xs text-[var(--color-text-tertiary)]"
-              style={{ fontFamily: 'var(--font-fraunces), serif', fontWeight: 300 }}
-            >
-              Real-time margin consistency across {fixtures.length} fixtures
-            </p>
+    <section>
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-sm font-mono-data text-text-secondary uppercase tracking-[0.1em]">
+          Live Match Trust Analysis
+        </h2>
+        {preview && (
+          <Link
+            href="/matches"
+            className="text-xs font-mono-data text-text-secondary hover:text-text-primary transition-colors duration-200 no-underline"
+          >
+            View all &rarr;
+          </Link>
+        )}
+      </div>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+        {displayFixtures.map((fixture, i) => (
+          <div
+            key={fixture.id}
+            className="animate-stagger-fade opacity-0"
+            style={{ animationDelay: `${600 + i * 80}ms` }}
+          >
+            <MatchCard fixture={fixture} />
           </div>
-          {preview && (
-            <a
-              href="/matches"
-              className="rounded-sm border border-[var(--color-line-hairline)] px-3 py-1.5 text-[11px] uppercase tracking-wider text-[var(--color-text-tertiary)] transition-colors hover:border-[var(--color-text-tertiary)] hover:text-[var(--color-text-secondary)]"
-              style={{ fontFamily: 'var(--font-martian-mono), monospace' }}
-            >
-              View all matches &rarr;
-            </a>
-          )}
-        </div>
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {displayFixtures.map((match, i) => (
-            <MatchCard key={match.id} match={match} index={i} />
-          ))}
-        </div>
+        ))}
       </div>
     </section>
   );

@@ -1,48 +1,39 @@
 import type { Metadata } from "next";
 import { Fraunces, Martian_Mono } from "next/font/google";
-import { Background, TopStrip } from "@oddtrust/ui";
 import "./globals.css";
+import { Background } from "@oddtrust/ui";
 
 const fraunces = Fraunces({
-  variable: "--font-fraunces",
   subsets: ["latin"],
+  variable: "--font-fraunces",
   weight: ["300", "400", "500", "600"],
-  display: "swap",
 });
 
 const martianMono = Martian_Mono({
-  variable: "--font-martian-mono",
   subsets: ["latin"],
-  weight: ["400", "500", "700"],
-  display: "swap",
+  variable: "--font-martian-mono",
+  weight: ["300", "400", "500"],
 });
 
 export const metadata: Metadata = {
   title: "OddsTrust — On-Chain Trust Oracle",
   description:
-    "Live trust verification for World Cup odds. Infrastructure agents read from, not a consumer betting app.",
-  openGraph: {
-    title: "OddsTrust — On-Chain Trust Oracle",
-    description:
-      "Live trust verification for World Cup odds. Infrastructure agents read from.",
-    type: "website",
-  },
+    "Decentralized tournament outcome verification with on-chain trust scores.",
 };
 
 export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
+}) {
   return (
     <html
       lang="en"
       className={`${fraunces.variable} ${martianMono.variable}`}
     >
-      <body className="min-h-screen antialiased">
+      <body>
         <Background />
-        <div className="mx-auto min-h-screen max-w-6xl border-x border-[var(--color-line-hairline)] bg-[var(--color-bg-void)]">
-          <TopStrip />
+        <div className="relative z-10 mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4 min-h-screen">
           {children}
         </div>
       </body>

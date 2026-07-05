@@ -2,7 +2,7 @@ import { GatePanel } from "@oddtrust/ui";
 
 export default function OraclePage() {
   return (
-    <section className="border-b border-[var(--color-line-hairline)] px-6 py-10">
+    <section className="border-b border-[var(--color-line-hairline)] px-6" style={{ paddingTop: 'var(--section-gap)', paddingBottom: 'var(--section-gap)' }}>
       <div className="mx-auto max-w-4xl">
         <div className="mb-8 text-center">
           <h1
@@ -21,11 +21,11 @@ export default function OraclePage() {
           </p>
         </div>
 
-        <div className="mb-8 mt-12">
+        <div className="mb-8">
           <GatePanel />
         </div>
 
-        <div className="rounded-sm border border-[var(--color-line-hairline)] bg-[var(--color-bg-panel)] p-5">
+        <div className="rounded-[var(--card-radius)] border border-[var(--color-line-hairline)] bg-[var(--color-bg-panel)]" style={{ padding: 'var(--card-padding)' }}>
           <h2
             className="mb-3 text-xs font-[500] uppercase tracking-[0.12em] text-[var(--color-text-secondary)]"
             style={{ fontFamily: 'var(--font-fraunces), serif' }}

@@ -14,12 +14,21 @@
   --color-text-secondary: #8FA398;
   --color-text-tertiary: #4E5D55;
 
-  --font-display: var(--font-fraunces), serif;
-  --font-mono: var(--font-martian-mono), monospace;
+  --font-display: var(--font-fraunces), "Fraunces", serif;
+  --font-mono: var(--font-martian-mono), "Martian Mono", monospace;
+
+  --card-padding: 24px;
+  --card-radius: 8px;
+  --section-gap: 48px;
+}
+
+:root {
+  --color-trophy-gold: #D4AF6A;
 }
 
 html {
   scroll-behavior: smooth;
+  font-family: var(--font-display);
 }
 
 body {
@@ -28,6 +37,10 @@ body {
   font-family: var(--font-display);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+code, pre, .font-mono-data {
+  font-family: var(--font-mono) !important;
 }
 
 @keyframes pulse-dot {
@@ -63,14 +76,14 @@ body {
   100% { background-color: transparent; }
 }
 
-@keyframes nav-indicator {
-  0% { width: 0; left: 50%; }
-  100% { width: 100%; left: 0; }
-}
-
 @keyframes stagger-fade {
   from { opacity: 0; transform: translateY(6px); }
   to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
 }
 
 .animate-pulse-dot {
@@ -101,6 +114,6 @@ body {
   animation: stagger-fade 0.5s ease-out forwards;
 }
 
-.pulse-dot {
-  animation: pulse-dot 2s ease-in-out infinite;
+.animate-fade-in {
+  animation: fade-in 0.5s ease-out forwards;
 }

@@ -1,95 +1,72 @@
-'use client';
+"use client";
 
-import { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from "react";
 
-function useCountUp(target: number, duration: number, delay: number) {
+function CountUp({
+  end,
+  duration,
+  suffix = "",
+}: {
+  end: number;
+  duration: number;
+  suffix?: string;
+}) {
   const [value, setValue] = useState(0);
-  const started = useRef(false);
+  const startRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (started.current) return;
-    started.current = true;
-    const timeout = setTimeout(() => {
-      const startTime = performance.now();
-      function tick(now: number) {
-        const elapsed = now - startTime;
-        const progress = Math.min(elapsed / duration, 1);
-        setValue(Math.floor(progress * target));
-        if (progress < 1) requestAnimationFrame(tick);
-      }
-      requestAnimationFrame(tick);
-    }, delay);
-    return () => clearTimeout(timeout);
-  }, [target, duration, delay]);
-
-  return value;
-}
-
-const stats = [
-  { label: 'Matches Audited', value: 128 },
-  { label: 'Consistency Checks', value: 14_592 },
-  { label: 'Inconsistencies Found', value: 7 },
-];
-
-export function Hero() {
-  const score = useCountUp(94, 800, 200);
+    startRef.current = null;
+    const raf = requestAnimationFrame(function tick(now: number) {
+      if (!startRef.current) startRef.current = now;
+      const elapsed = now - startRef.current;
+      const progress = Math.min(elapsed / duration, 1);
+      setValue(Math.floor(progress * end));
+      if (progress < 1) requestAnimationFrame(tick);
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [end, duration]);
 
   return (
-    <section className="border-b border-[var(--color-line-hairline)] px-6 py-12 sm:py-16">
-      <div className="mx-auto max-w-4xl text-center">
-        <p
-          className="mb-2 text-xs font-[400] uppercase tracking-[0.15em] text-[var(--color-text-secondary)]"
-          style={{ fontFamily: 'var(--font-fraunces), serif', animation: 'stagger-fade 0.5s ease-out 300ms both' }}
-        >
-          Tournament Trust Score
-        </p>
-        <div style={{ animation: 'stagger-fade 0.5s ease-out 400ms both' }}>
-          <span
-            className="block text-7xl leading-none font-[600] sm:text-8xl md:text-[160px]"
-            style={{
-              fontFamily: 'var(--font-martian-mono), monospace',
-              color: 'var(--color-trophy-gold)',
-              letterSpacing: '-0.04em',
-              fontVariationSettings: '"wght" 600',
-              textShadow: '0 0 60px color-mix(in srgb, var(--color-trophy-gold) 15%, transparent)',
-            }}
-          >
-            {score}
-            <span className="text-3xl sm:text-4xl md:text-[64px]" style={{ color: 'var(--color-trophy-gold)' }}>/100</span>
-          </span>
+    <span>
+      {value}
+      {suffix}
+    </span>
+  );
+}
+
+export function Hero() {
+  return (
+    <section className="py-16 md:py-20 text-center animate-fade-in opacity-0 [animation-delay:300ms] [animation-fill-mode:forwards]">
+      {/* tournament trust score */}
+      <p className="text-xs font-mono-data text-text-secondary uppercase tracking-[0.12em] mb-2">
+        Tournament Trust Score
+      </p>
+      <h1
+        className="text-6xl md:text-8xl font-[500] tracking-tight leading-none"
+        style={{ color: "var(--color-trophy-gold, #D4AF6A)" }}
+      >
+        <CountUp end={97} duration={800} suffix="%" />
+      </h1>
+
+      {/* stats row */}
+      <div className="mt-8 flex flex-wrap justify-center gap-8 text-sm font-mono-data">
+        <div className="text-center">
+          <p className="text-text-secondary text-xs">Total Fixtures</p>
+          <p className="text-text-primary mt-0.5 text-base">
+            <CountUp end={128} duration={800} />
+          </p>
         </div>
-        <div
-          className="mx-auto mt-8 h-px w-32"
-          style={{
-            background: 'linear-gradient(90deg, transparent 0%, color-mix(in srgb, var(--color-trophy-gold) 30%, transparent) 50%, transparent 100%)',
-            animation: 'stagger-fade 0.5s ease-out 500ms both',
-          }}
-        />
-        <div
-          className="mx-auto mt-8 flex flex-wrap justify-center gap-8 sm:gap-12"
-          style={{ animation: 'stagger-fade 0.5s ease-out 600ms both' }}
-        >
-          {stats.map((stat, i) => (
-            <div key={stat.label} className="flex items-center gap-4">
-              <div className="text-center">
-                <span
-                  className="block text-2xl font-[500] text-[var(--color-text-primary)]"
-                  style={{ fontFamily: 'var(--font-martian-mono), monospace' }}
-                >
-                  {stat.value.toLocaleString()}
-                </span>
-                <span
-                  className="text-xs text-[var(--color-text-secondary)]"
-                  style={{ fontFamily: 'var(--font-fraunces), serif', fontWeight: 400 }}
-                >
-                  {stat.label}
-                </span>
-              </div>
-              {i < stats.length - 1 && (
-                <span className="hidden h-8 w-px bg-[var(--color-line-hairline)] sm:block" />
-              )}
-            </div>
-          ))}
+        <div className="text-center">
+          <p className="text-text-secondary text-xs">Consistent</p>
+          <p className="text-pitch-green mt-0.5 text-base">
+            <CountUp end={114} duration={800} />
+          </p>
+        </div>
+        <div className="text-center">
+          <p className="text-text-secondary text-xs">Flagged</p>
+          <p className="text-signal-amber mt-0.5 text-base">
+            <CountUp end={14} duration={800} />
+          </p>
         </div>
       </div>
     </section>

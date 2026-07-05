@@ -53,21 +53,17 @@ function marketOddsFor(market: Market, home: string, away: string): { label: str
 
 export default function MatchDetailPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
-  const match = fixtures.find((f) => f.id === Number(id));
+  const match = fixtures.find((f) => f.id === id);
 
   if (!match) {
     return (
-      <section className="px-6 py-20 text-center">
-        <h1
-          className="text-lg font-[500] text-[var(--color-text-secondary)] mb-4"
-          style={{ fontFamily: 'var(--font-fraunces), serif' }}
-        >
+      <section className="py-20 text-center">
+        <h1 className="text-lg font-[500] text-text-secondary mb-4">
           Match not found
         </h1>
         <Link
           href="/matches"
-          className="text-sm text-[var(--color-text-tertiary)] underline hover:text-[var(--color-text-secondary)]"
-          style={{ fontFamily: 'var(--font-martian-mono), monospace' }}
+          className="font-mono-data text-sm text-text-tertiary underline hover:text-text-secondary"
         >
           &larr; Back to matches
         </Link>
@@ -92,171 +88,131 @@ export default function MatchDetailPage({ params }: { params: Promise<{ id: stri
   const isConsistent = marginPct < 5;
 
   return (
-    <section className="px-6 py-10">
-      <div className="mx-auto max-w-4xl">
-        <div className="mb-6">
-          <Link
-            href="/matches"
-            className="text-[11px] text-[var(--color-text-tertiary)] transition-colors hover:text-[var(--color-text-secondary)]"
-            style={{ fontFamily: 'var(--font-martian-mono), monospace' }}
-          >
-            &larr; Back to matches
-          </Link>
-        </div>
-
-        <div className="mb-8 rounded-sm border border-[var(--color-line-hairline)] bg-[var(--color-bg-panel)] p-6">
-          <div className="mb-4 flex items-center justify-between">
-            <span
-              className="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] font-[500] uppercase tracking-wider"
-              style={{
-                fontFamily: 'var(--font-fraunces), serif',
-                backgroundColor: isConsistent
-                  ? 'color-mix(in srgb, var(--color-pitch-green) 8%, transparent)'
-                  : 'color-mix(in srgb, var(--color-signal-amber) 8%, transparent)',
-                color: isConsistent ? 'var(--color-pitch-green)' : 'var(--color-signal-amber)',
-                border: `1px solid ${isConsistent ? 'color-mix(in srgb, var(--color-pitch-green) 20%, transparent)' : 'color-mix(in srgb, var(--color-signal-amber) 20%, transparent)'}`,
-              }}
-            >
-              <span
-                className={`inline-block h-1.5 w-1.5 rounded-full ${isConsistent ? 'bg-[var(--color-pitch-green)]' : 'bg-[var(--color-signal-amber)]'}`}
-              />
-              {isConsistent ? 'Consistent' : 'Flagged'}
-            </span>
-            <span
-              className="text-xs text-[var(--color-text-tertiary)]"
-              style={{ fontFamily: 'var(--font-martian-mono), monospace' }}
-            >
-              Checks: {match.checks} &middot; Last: {match.lastChecked}
-            </span>
-          </div>
-
-          <h1
-            className="text-2xl font-[500] sm:text-3xl"
-            style={{ fontFamily: 'var(--font-fraunces), serif' }}
-          >
-            {match.home} <span className="text-[var(--color-text-tertiary)] font-[300]">v</span> {match.away}
-          </h1>
-
-          <div className="mt-4 flex items-center gap-4">
-            <span
-              className="text-sm text-[var(--color-text-secondary)]"
-              style={{ fontFamily: 'var(--font-fraunces), serif', fontWeight: 400 }}
-            >
-              Margin
-            </span>
-            <span
-              className="text-xl font-[500] tabular-nums"
-              style={{
-                fontFamily: 'var(--font-martian-mono), monospace',
-                color: match.status === 'flagged' ? 'var(--color-signal-amber)' : match.margin >= 0 ? 'var(--color-pitch-green)' : 'var(--color-signal-red)',
-              }}
-            >
-              {match.margin >= 0 ? '+' : ''}{match.margin.toFixed(2)}%
-            </span>
-          </div>
-        </div>
-
-        <h2
-          className="mb-4 text-xs font-[400] uppercase tracking-[0.15em] text-[var(--color-text-secondary)]"
-          style={{ fontFamily: 'var(--font-fraunces), serif' }}
+    <section className="py-12">
+      <div className="mb-6">
+        <Link
+          href="/matches"
+          className="font-mono-data text-[11px] text-text-tertiary hover:text-text-secondary transition-colors"
         >
-          Market Breakdown
-        </h2>
+          &larr; Back to matches
+        </Link>
+      </div>
 
-        <div className="space-y-3">
-          {markets.map((market) => {
-            const odds = marketOddsFor(market, match.home, match.away);
+      <div className="mb-8 rounded-lg border border-line-hairline bg-bg-panel p-6">
+        <div className="mb-4 flex items-center justify-between">
+          <span
+            className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-[11px] uppercase tracking-wider border ${
+              isConsistent
+                ? 'text-pitch-green border-pitch-green/20 bg-pitch-green/10'
+                : 'text-signal-amber border-signal-amber/20 bg-signal-amber/10'
+            }`}
+          >
+            <span className={`inline-block h-1.5 w-1.5 rounded-full ${isConsistent ? 'bg-pitch-green' : 'bg-signal-amber'}`} />
+            {isConsistent ? 'Consistent' : 'Flagged'}
+          </span>
+          <span className="font-mono-data text-xs text-text-tertiary">
+            Last: {match.lastChecked}
+          </span>
+        </div>
 
-            const sumProbs = odds.reduce((s, o) => s + impliedProbability(o.value), 0);
+        <h1 className="text-2xl sm:text-3xl font-[500]">
+          {match.homeTeam} <span className="text-text-tertiary font-[300]">v</span> {match.awayTeam}
+        </h1>
 
-            return (
-              <div
-                key={market.name}
-                className="rounded-sm border border-[var(--color-line-hairline)] bg-[var(--color-bg-panel)] p-4"
-              >
-                <div className="mb-3 flex items-center justify-between">
-                  <span
-                    className="text-xs font-[500] text-[var(--color-text-secondary)]"
-                    style={{ fontFamily: 'var(--font-fraunces), serif' }}
-                  >
-                    {market.name}
-                  </span>
-                  <span
-                    className="text-[11px] tabular-nums"
-                    style={{
-                      fontFamily: 'var(--font-martian-mono), monospace',
-                      color: sumProbs > 1.05
-                        ? 'var(--color-signal-amber)'
-                        : 'var(--color-pitch-green)',
-                    }}
-                  >
-                    &Sigma; = {formatProb(sumProbs)}
-                  </span>
-                </div>
-                <div className="space-y-2">
-                  {odds.map((o) => {
-                    const prob = impliedProbability(o.value);
-                    return (
-                      <div
-                        key={o.label}
-                        className="flex items-center justify-between border-b border-[var(--color-line-hairline)]/40 pb-1.5 text-[12px] last:border-b-0 last:pb-0"
-                      >
-                        <span
-                          className="text-[var(--color-text-primary)]"
-                          style={{ fontFamily: 'var(--font-fraunces), serif', fontWeight: 400 }}
-                        >
-                          {o.label}
+        <div className="mt-4 flex items-center gap-4">
+          <span className="text-sm text-text-secondary">Margin</span>
+          <span
+            className={`font-mono-data text-xl tabular-nums ${
+              match.status === 'flagged'
+                ? 'text-signal-amber'
+                : match.status === 'blocked'
+                ? 'text-signal-red'
+                : 'text-pitch-green'
+            }`}
+          >
+            {match.margin >= 0 ? '+' : ''}{match.margin.toFixed(2)}%
+          </span>
+        </div>
+      </div>
+
+      <h2 className="mb-4 text-xs uppercase tracking-[0.15em] text-text-secondary">
+        Market Breakdown
+      </h2>
+
+      <div className="space-y-3">
+        {markets.map((market) => {
+          const odds = marketOddsFor(market, match.homeTeam, match.awayTeam);
+          const sumProbs = odds.reduce((s, o) => s + impliedProbability(o.value), 0);
+
+          return (
+            <div
+              key={market.name}
+              className="rounded-lg border border-line-hairline bg-bg-panel p-6"
+            >
+              <div className="mb-3 flex items-center justify-between">
+                <span className="text-xs font-[500] text-text-secondary">
+                  {market.name}
+                </span>
+                <span
+                  className={`font-mono-data text-[11px] tabular-nums ${
+                    sumProbs > 1.05 ? 'text-signal-amber' : 'text-pitch-green'
+                  }`}
+                >
+                  &Sigma; = {formatProb(sumProbs)}
+                </span>
+              </div>
+              <div className="space-y-2">
+                {odds.map((o) => {
+                  const prob = impliedProbability(o.value);
+                  return (
+                    <div
+                      key={o.label}
+                      className="flex items-center justify-between border-b border-line-hairline/40 pb-1.5 text-[12px] last:border-b-0 last:pb-0"
+                    >
+                      <span className="text-text-primary">{o.label}</span>
+                      <div className="flex items-center gap-4">
+                        <span className="font-mono-data tabular-nums text-text-tertiary">
+                          {o.value.toFixed(2)}
                         </span>
-                        <div className="flex items-center gap-4">
-                          <span
-                            className="tabular-nums text-[var(--color-text-tertiary)]"
-                            style={{ fontFamily: 'var(--font-martian-mono), monospace' }}
-                          >
-                            {o.value.toFixed(2)}
-                          </span>
-                          <span
-                            className="w-16 text-right tabular-nums text-[var(--color-text-secondary)]"
-                            style={{ fontFamily: 'var(--font-martian-mono), monospace' }}
-                          >
-                            {formatProb(prob)}
-                          </span>
-                          <div className="h-1.5 w-16 overflow-hidden rounded-full bg-[var(--color-bg-raised)]">
-                            <div
-                              className="h-full rounded-full transition-all"
-                              style={{
-                                width: `${Math.min(prob * 100, 100)}%`,
-                                backgroundColor: 'var(--color-pitch-green-dim)',
-                              }}
-                            />
-                          </div>
+                        <span className="font-mono-data w-16 text-right tabular-nums text-text-secondary">
+                          {formatProb(prob)}
+                        </span>
+                        <div className="h-1.5 w-16 overflow-hidden rounded-full bg-bg-raised">
+                          <div
+                            className="h-full rounded-full transition-all bg-pitch-green-dim"
+                            style={{ width: `${Math.min(prob * 100, 100)}%` }}
+                          />
                         </div>
                       </div>
-                    );
-                  })}
-                </div>
+                    </div>
+                  );
+                })}
               </div>
-            );
-          })}
-        </div>
+            </div>
+          );
+        })}
+      </div>
 
-        <div className="mt-8 rounded-sm border border-[var(--color-line-hairline)] bg-[var(--color-bg-panel)] p-4">
-          <h3
-            className="mb-2 text-xs font-[500] uppercase tracking-[0.12em] text-[var(--color-text-secondary)]"
-            style={{ fontFamily: 'var(--font-fraunces), serif' }}
-          >
-            Consistency Check
-          </h3>
-          <p
-            className="text-[12px] leading-relaxed text-[var(--color-text-secondary)]"
-            style={{ fontFamily: 'var(--font-fraunces), serif', fontWeight: 300 }}
-          >
-            Total implied probability across all markets: <strong style={{ fontFamily: 'var(--font-martian-mono), monospace', color: 'var(--color-text-primary)' }}>{formatProb(totalProb)}</strong>.
-            Bookmaker margin: <strong style={{ fontFamily: 'var(--font-martian-mono), monospace', color: isConsistent ? 'var(--color-pitch-green)' : 'var(--color-signal-amber)' }}>{marginPct.toFixed(2)}%</strong>.
-            {isConsistent
-              ? ' Margins are within the expected range — odds are consistent.'
-              : ' Margins exceed the expected threshold — odds may be inconsistent.'}
-          </p>
-        </div>
+      <div className="mt-8 rounded-lg border border-line-hairline bg-bg-panel p-6">
+        <h3 className="mb-2 text-xs uppercase tracking-[0.12em] text-text-secondary">
+          Consistency Check
+        </h3>
+        <p className="text-[12px] leading-relaxed text-text-secondary">
+          Total implied probability across all markets: <strong className="font-mono-data text-text-primary">{formatProb(totalProb)}</strong>.
+          Bookmaker margin: <strong className={`font-mono-data ${isConsistent ? 'text-pitch-green' : 'text-signal-amber'}`}>{marginPct.toFixed(2)}%</strong>.
+          {isConsistent
+            ? ' Margins are within the expected range — odds are consistent.'
+            : ' Margins exceed the expected threshold — odds may be inconsistent.'}
+        </p>
+      </div>
+
+      <div className="mt-8">
+        <Link
+          href="/"
+          className="font-mono-data text-xs text-text-secondary hover:text-text-primary transition-colors no-underline"
+        >
+          &larr; Back to home
+        </Link>
       </div>
     </section>
   );

@@ -6,7 +6,7 @@ const txlineEndpoints = [
 
 export default function DocsPage() {
   return (
-    <section className="px-6 py-10">
+    <section className="px-6" style={{ paddingTop: 'var(--section-gap)', paddingBottom: 'var(--section-gap)' }}>
       <div className="mx-auto max-w-3xl">
         <h1
           className="mb-2 text-sm font-[500] uppercase tracking-[0.12em] text-[var(--color-text-secondary)]"
@@ -23,7 +23,7 @@ export default function DocsPage() {
           proofs to Solana.
         </p>
 
-        <div className="mb-10 rounded-sm border border-[var(--color-line-hairline)] bg-[var(--color-bg-panel)] p-5">
+        <div className="mb-10 rounded-[var(--card-radius)] border border-[var(--color-line-hairline)] bg-[var(--color-bg-panel)]" style={{ padding: 'var(--card-padding)' }}>
           <h2
             className="mb-4 text-xs font-[500] uppercase tracking-[0.12em] text-[var(--color-text-secondary)]"
             style={{ fontFamily: 'var(--font-fraunces), serif' }}
@@ -60,7 +60,7 @@ export default function DocsPage() {
           </div>
         </div>
 
-        <div className="mb-10 rounded-sm border border-[var(--color-line-hairline)] bg-[var(--color-bg-panel)] p-5">
+        <div className="mb-10 rounded-[var(--card-radius)] border border-[var(--color-line-hairline)] bg-[var(--color-bg-panel)]" style={{ padding: 'var(--card-padding)' }}>
           <h2
             className="mb-4 text-xs font-[500] uppercase tracking-[0.12em] text-[var(--color-text-secondary)]"
             style={{ fontFamily: 'var(--font-fraunces), serif' }}
@@ -110,7 +110,7 @@ export default function DocsPage() {
           </div>
         </div>
 
-        <div className="mb-10 rounded-sm border border-[var(--color-line-hairline)] bg-[var(--color-bg-panel)] p-5">
+        <div className="mb-10 rounded-[var(--card-radius)] border border-[var(--color-line-hairline)] bg-[var(--color-bg-panel)]" style={{ padding: 'var(--card-padding)' }}>
           <h2
             className="mb-4 text-xs font-[500] uppercase tracking-[0.12em] text-[var(--color-text-secondary)]"
             style={{ fontFamily: 'var(--font-fraunces), serif' }}
@@ -147,7 +147,7 @@ export default function DocsPage() {
           </div>
         </div>
 
-        <div className="rounded-sm border border-[var(--color-line-hairline)] bg-[var(--color-bg-panel)] p-5">
+        <div className="rounded-[var(--card-radius)] border border-[var(--color-line-hairline)] bg-[var(--color-bg-panel)]" style={{ padding: 'var(--card-padding)' }}>
           <h2
             className="mb-4 text-xs font-[500] uppercase tracking-[0.12em] text-[var(--color-text-secondary)]"
             style={{ fontFamily: 'var(--font-fraunces), serif' }}
