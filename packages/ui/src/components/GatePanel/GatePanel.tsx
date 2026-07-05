@@ -17,7 +17,7 @@ const agents: GateAgent[] = [
   { id: "Gate-04", label: "Settlement Guard", inspectFixture: "Eastside FC vs Westend" },
 ];
 
-function GateRow({ agent }: { agent: GateAgent }) {
+function GateRow({ agent, delay }: { agent: GateAgent; delay: number }) {
   const [state, setState] = useState<Resolution>("idle");
 
   const resolve = useCallback(() => {
@@ -28,31 +28,44 @@ function GateRow({ agent }: { agent: GateAgent }) {
   }, []);
 
   useEffect(() => {
-    const t1 = setTimeout(resolve, Math.random() * 1000);
+    const t1 = setTimeout(resolve, 800 + Math.random() * 600);
     const iv = setInterval(resolve, 5000 + Math.random() * 3000);
     return () => { clearTimeout(t1); clearInterval(iv); };
   }, [resolve]);
 
+  const borderStyle =
+    state === "executed" ? "border-l-pitch-green border-line-hairline" :
+    state === "blocked" ? "border-l-signal-red border-line-hairline" :
+    state === "inspecting" ? "border-l-pitch-green-dim border-line-hairline" :
+    "border-line-hairline";
+
   return (
     <div
-      className={`rounded-lg border p-4 transition-all duration-300 ${
-        state === "executed" ? "border-pitch-green/40" :
-        state === "blocked" ? "border-signal-red/40" :
-        state === "inspecting" ? "border-line-hairline bg-bg-raised/30" :
-        "border-line-hairline/40 opacity-60"
-      }`}
+      className={`bg-bg-raised border ${borderStyle} rounded-lg p-6 transition-all duration-300 animate-fade-up opacity-0 ${
+        state === "idle" ? "opacity-50" : ""
+      } hover:-translate-y-0.5 hover:brightness-110`}
+      style={{ animationDelay: `${delay}ms` }}
     >
-      <div className="flex items-center justify-between mb-1">
-        <span className="font-mono text-xs text-text-primary">{agent.id}</span>
-        {state === "inspecting" && <span className="font-mono text-[10px] text-text-tertiary animate-pulse">Inspecting...</span>}
-        {state === "executed" && <span className="font-mono text-[10px] text-pitch-green">EXECUTED</span>}
-        {state === "blocked" && <span className="font-mono text-[10px] text-signal-red">BLOCKED</span>}
+      <div className="flex items-center justify-between gap-2 mb-2">
+        <span className="font-mono text-xs text-text-primary font-[500]">{agent.id}</span>
+        {state === "inspecting" && (
+          <span className="font-mono text-[10px] text-text-tertiary animate-pulse">Inspecting...</span>
+        )}
+        {state === "executed" && (
+          <span className="font-mono text-[10px] text-pitch-green">EXECUTED</span>
+        )}
+        {state === "blocked" && (
+          <span className="font-mono text-[10px] text-signal-red">BLOCKED</span>
+        )}
       </div>
-      <p className="text-[10px] text-text-tertiary">{agent.label}</p>
+      <p className="text-xs text-text-primary">{agent.label}</p>
       {state === "blocked" && (
-        <p className="font-mono text-[9px] text-signal-red/70 mt-1.5 leading-tight">
+        <p className="font-mono text-[10px] text-signal-red/70 mt-2 leading-tight">
           Cause: {agent.inspectFixture} flagged
         </p>
+      )}
+      {state === "idle" && (
+        <p className="font-mono text-[10px] text-text-tertiary/50 mt-2">Awaiting check...</p>
       )}
     </div>
   );
@@ -81,9 +94,9 @@ export function GatePanel() {
       <p className="text-xs text-text-tertiary leading-relaxed max-w-lg mb-6">
         External agents audit trust data before execution. Each gate independently resolves a transaction based on live oracle state.
       </p>
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 max-w-2xl">
-        {agents.map((a) => (
-          <GateRow key={a.id} agent={a} />
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 max-w-2xl">
+        {agents.map((a, i) => (
+          <GateRow key={a.id} agent={a} delay={i * 100} />
         ))}
       </div>
     </section>
