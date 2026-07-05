@@ -32,8 +32,8 @@ export function Hero() {
         <CountUp end={97} duration={800} suffix="%" />
       </h1>
 
-      <div className="mt-12 inline-grid grid-cols-3 gap-4 mx-auto">
-        <div className="bg-bg-raised border border-line-hairline rounded-lg p-5 min-w-[160px] text-center">
+      <div className="mt-12 flex justify-center gap-4">
+        <div className="bg-bg-raised border border-line-hairline rounded-lg p-5 min-w-[160px] flex-1 max-w-[220px] text-center">
           <div className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-bg-void mb-3">
             <span className="inline-block w-2 h-2 rounded-full bg-text-tertiary" />
           </div>
@@ -42,7 +42,7 @@ export function Hero() {
           </p>
           <p className="text-[11px] text-text-secondary uppercase tracking-wider">Matches Audited</p>
         </div>
-        <div className="bg-bg-raised border border-line-hairline rounded-lg p-5 min-w-[160px] text-center">
+        <div className="bg-bg-raised border border-line-hairline rounded-lg p-5 min-w-[160px] flex-1 max-w-[220px] text-center">
           <div className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-bg-void mb-3">
             <span className="inline-block w-2 h-2 rounded-full bg-pitch-green" />
           </div>
@@ -51,7 +51,7 @@ export function Hero() {
           </p>
           <p className="text-[11px] text-text-secondary uppercase tracking-wider">Consistency Checks</p>
         </div>
-        <div className="bg-bg-raised border border-line-hairline rounded-lg p-5 min-w-[160px] text-center">
+        <div className="bg-bg-raised border border-line-hairline rounded-lg p-5 min-w-[160px] flex-1 max-w-[220px] text-center">
           <div className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-bg-void mb-3">
             <span className="inline-block w-2 h-2 rounded-full bg-signal-amber" />
           </div>
