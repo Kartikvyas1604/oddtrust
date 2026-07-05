@@ -24,7 +24,7 @@ export function TopStrip() {
         Odds<span className="text-pitch-green">Trust</span>
       </Link>
 
-      {/* nav links */}
+      {/* nav links — explicit gap-6 between each item */}
       <nav className="flex items-center gap-6 overflow-x-auto">
         {navLinks.map((link) => (
           <Link

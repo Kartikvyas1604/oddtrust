@@ -23,10 +23,10 @@ export const fixtures: Fixture[] = [
   { id: "6", homeTeam: "Eastside FC", awayTeam: "Westend Athletic", status: "flagged", margin: 58.4, lastChecked: "34s ago" },
 ];
 
-const statusConfig: Record<Status, { label: string; color: string; dot: string }> = {
-  consistent: { label: "Consistent", color: "text-pitch-green", dot: "bg-pitch-green" },
-  flagged: { label: "Flagged", color: "text-signal-amber", dot: "bg-signal-amber" },
-  blocked: { label: "Blocked", color: "text-signal-red", dot: "bg-signal-red" },
+const statusConfig: Record<Status, { label: string; color: string; dot: string; borderColor: string }> = {
+  consistent: { label: "Consistent", color: "text-pitch-green", dot: "bg-pitch-green", borderColor: "border-line-hairline" },
+  flagged: { label: "Flagged", color: "text-signal-amber", dot: "bg-signal-amber", borderColor: "border-l-signal-amber border-line-hairline" },
+  blocked: { label: "Blocked", color: "text-signal-red", dot: "bg-signal-red", borderColor: "border-l-signal-red border-line-hairline" },
 };
 
 export function MatchCard({ fixture }: { fixture: Fixture }) {
@@ -34,14 +34,14 @@ export function MatchCard({ fixture }: { fixture: Fixture }) {
   return (
     <Link
       href={`/matches/${fixture.id}`}
-      className="group block bg-bg-panel border border-line-hairline rounded-lg p-4 no-underline transition-all duration-120 hover:-translate-y-0.5 hover:bg-bg-raised"
+      className={`group block bg-bg-raised border ${cfg.borderColor} rounded-lg p-5 no-underline transition-all duration-120 hover:-translate-y-0.5 hover:brightness-110 overflow-visible`}
     >
-      <div className="flex items-center justify-between gap-2 mb-2 min-w-0">
-        <span className="text-sm text-text-primary font-[500] truncate min-w-0">
+      <div className="flex items-center justify-between gap-3 mb-3">
+        <span className="text-sm text-text-primary font-[500] truncate">
           {fixture.homeTeam}
         </span>
         <span className="shrink-0 text-xs text-text-tertiary font-mono-data">vs</span>
-        <span className="text-sm text-text-primary font-[500] truncate min-w-0 text-right">
+        <span className="text-sm text-text-primary font-[500] truncate text-right">
           {fixture.awayTeam}
         </span>
       </div>
@@ -54,7 +54,7 @@ export function MatchCard({ fixture }: { fixture: Fixture }) {
           {fixture.margin}%
         </span>
       </div>
-      <p className="text-[10px] font-mono-data text-text-tertiary mt-2">
+      <p className="text-[10px] font-mono-data text-text-tertiary mt-3">
         Checked {fixture.lastChecked}
       </p>
     </Link>
@@ -78,11 +78,11 @@ export function MatchGrid({ preview }: { preview?: boolean }) {
           </Link>
         )}
       </div>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {displayFixtures.map((fixture, i) => (
           <div
             key={fixture.id}
-            className="animate-stagger-fade opacity-0"
+            className="animate-stagger-fade opacity-0 overflow-visible"
             style={{ animationDelay: `${600 + i * 80}ms` }}
           >
             <MatchCard fixture={fixture} />

@@ -27,7 +27,18 @@ const allFixtures = [
   "Valley United vs Crest Athletic",
 ];
 
-function generateEntry(id: number): Entry {
+function seededEntry(id: number): Entry {
+  const statuses: Entry["status"][] = ["verified", "verified", "verified", "inconsistent", "verified"];
+  return {
+    id,
+    slot: String(284_391_882 + id),
+    fixture: allFixtures[id % allFixtures.length],
+    status: statuses[id % statuses.length],
+    margin: (85 + (id * 3) % 15).toFixed(1),
+  };
+}
+
+function randomEntry(id: number): Entry {
   const rand = Math.random();
   const status = rand > 0.75 ? "failed" : rand > 0.4 ? "verified" : "inconsistent";
   const slot = String(284_391_800 + Math.floor(Math.random() * 200));
@@ -36,18 +47,18 @@ function generateEntry(id: number): Entry {
   return { id, slot, fixture, status, margin };
 }
 
-const initialEntries: Entry[] = Array.from({ length: 5 }, (_, i) =>
-  generateEntry(i)
+const deterministicEntries: Entry[] = Array.from({ length: 5 }, (_, i) =>
+  seededEntry(i)
 );
 
 export function ProofFeed() {
-  const [entries, setEntries] = useState<Entry[]>(initialEntries);
+  const [entries, setEntries] = useState<Entry[]>(deterministicEntries);
   const countRef = useRef(5);
 
   useEffect(() => {
     const interval = setInterval(() => {
       const nextId = countRef.current++;
-      setEntries((prev) => [generateEntry(nextId), ...prev.slice(0, 49)]);
+      setEntries((prev) => [randomEntry(nextId), ...prev.slice(0, 49)]);
     }, 4000);
     return () => clearInterval(interval);
   }, []);
@@ -63,7 +74,6 @@ export function ProofFeed() {
         </span>
       </div>
       <div className="bg-bg-panel border border-line-hairline rounded-lg overflow-hidden">
-        {/* header */}
         <div className="flex items-center gap-3 px-3 py-2 border-b border-line-hairline bg-bg-void/50">
           <span className="text-[10px] font-mono-data text-text-tertiary w-[80px] shrink-0">
             Slot
@@ -79,7 +89,6 @@ export function ProofFeed() {
           </span>
         </div>
 
-        {/* entries */}
         <div className="divide-y divide-line-hairline/50 max-h-[360px] overflow-y-auto">
           {entries.map((entry, i) => {
             const cfg = statusConfig[entry.status];

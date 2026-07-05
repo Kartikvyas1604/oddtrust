@@ -11,11 +11,20 @@ const agents = [
   { id: "Gate-04", label: "Settlement Guard" },
 ];
 
+const fixtureCauses = [
+  "Stormhaven vs Northgate flagged",
+  "Ironbound vs Silverlake margin breach",
+  "Crystal Palace vs Bridge City blocked",
+  "Eastside FC vs Westend inconsistent",
+];
+
 function AgentRow({ agent }: { agent: (typeof agents)[number] }) {
   const [state, setState] = useState<Resolution>("idle");
+  const causeRef = useRef("");
 
   const resolve = useCallback(() => {
     setState("inspecting");
+    causeRef.current = fixtureCauses[Math.floor(Math.random() * fixtureCauses.length)];
     setTimeout(() => {
       setState(Math.random() > 0.4 ? "executed" : "blocked");
     }, 600 + Math.random() * 800);
@@ -57,6 +66,11 @@ function AgentRow({ agent }: { agent: (typeof agents)[number] }) {
         )}
       </div>
       <p className="text-[10px] text-text-tertiary">{agent.label}</p>
+      {state === "blocked" && (
+        <p className="text-[9px] font-mono-data text-signal-red/70 mt-1 leading-tight">
+          Cause: {causeRef.current}
+        </p>
+      )}
     </div>
   );
 }

@@ -46,20 +46,20 @@ export function Hero() {
       </h1>
 
       {/* stats row */}
-      <div className="mt-8 flex flex-wrap justify-center gap-8 text-sm font-mono-data">
-        <div className="text-center">
+      <div className="mt-10 flex flex-wrap justify-center gap-x-10 gap-y-4 text-sm font-mono-data">
+        <div className="text-center min-w-[100px]">
           <p className="text-text-secondary text-xs">Total Fixtures</p>
           <p className="text-text-primary mt-0.5 text-base">
             <CountUp end={128} duration={800} />
           </p>
         </div>
-        <div className="text-center">
+        <div className="text-center min-w-[100px]">
           <p className="text-text-secondary text-xs">Consistent</p>
           <p className="text-pitch-green mt-0.5 text-base">
             <CountUp end={114} duration={800} />
           </p>
         </div>
-        <div className="text-center">
+        <div className="text-center min-w-[100px]">
           <p className="text-text-secondary text-xs">Flagged</p>
           <p className="text-signal-amber mt-0.5 text-base">
             <CountUp end={14} duration={800} />
