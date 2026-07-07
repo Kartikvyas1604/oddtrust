@@ -35,8 +35,12 @@ In an efficient market, the sum of implied probabilities equals **1.0 (100%)**. 
 ```
 oddtrust/
 ├── apps/
-│   └── web/                     Next.js 16 app — the oracle UI
+│   ├── web/                     Next.js 16 app — frontend + REST API (Route Handlers)
+│   │   ├── app/api/             All REST API endpoints (/health, /api/overview, etc.)
+│   │   └── ws-server.ts         Standalone WebSocket server for live proof feed
+│   └── backend/                 Worker — TxLINE ingestion, detection, chain submission
 ├── packages/
+│   ├── backend-core/            Shared detection math (checkConsistency, oddsToProbability)
 │   ├── design-tokens/           Colors, typography, spacing constants
 │   ├── ui/                      All React components (every page section)
 │   └── utils/                   Pure utility functions (formatters)
@@ -44,7 +48,30 @@ oddtrust/
 └── pnpm-workspace.yaml          Workspace definition
 ```
 
-The monorepo follows a **shared-first** rule: logic lives in `packages/` unless it has to be in `apps/web`. The web application is thin — it imports and assembles rather than defines.
+### Service Architecture
+
+```
+TxLINE API/WS ──► Backend Worker ──┬──► Postgres (persistence)
+                      │              ├──► Redis (cache + pub/sub)
+                      │              ├──► BullMQ ──► Solana (on-chain)
+                      │              └──► Redis pub/sub
+                      │
+Next.js API Routes ◄──┘ (reads Postgres + Redis)
+       │
+       ├── WebSocket Server ◄── Redis sub ──► WS clients
+       │
+       └── Frontend Pages (consumes API Routes)
+```
+
+- **REST API**: All endpoints run as Next.js Route Handlers in `apps/web/app/api/`
+  — no separate API server needed.
+- **Worker**: `apps/backend` runs the ingestion pipeline (TxLINE connection,
+  odds streaming, consistency detection) and the BullMQ on-chain submission
+  queue. It does not serve HTTP.
+- **WebSocket Server**: Standalone process that subscribes to Redis pub/sub
+  and streams proof-feed events to connected clients on port 3002.
+- **Shared Logic**: `packages/backend-core` contains the pure `checkConsistency()`
+  math used by both the worker and any code that needs detection logic.
 
 ---
 
@@ -52,13 +79,20 @@ The monorepo follows a **shared-first** rule: logic lives in `packages/` unless 
 
 | Layer | Technology |
 |---|---|
-| Framework | Next.js 16 (App Router) + Turbopack |
+| Framework (UI) | Next.js 16 (App Router) + Turbopack |
+| API Layer | Next.js Route Handlers (Node.js runtime) |
+| Worker | Fastify 5 + BullMQ (ingestion, detection, chain submission) |
 | Monorepo | pnpm workspaces + Turborepo |
 | Language | TypeScript (strict mode) |
+| Database | PostgreSQL 16 (fixtures, odds snapshots, consistency checks, proof log) |
+| Cache | Redis 7 (API caching, pub/sub for WS, deduplication) |
+| Message Queue | BullMQ (on-chain submission with retries and backoff) |
+| Detection Math | `packages/backend-core` — Σ(1/odds) consistency check |
 | Styling | Tailwind CSS v4 with custom design tokens |
 | Fonts | Fraunces (serif/display) · Martian Mono (data/monospace) |
-| Deployment | Static export via `next build` |
-| CI | GitHub Actions — lint, typecheck, build |
+| Logging | Pino (structured JSON, secrets redacted) |
+| Metrics | Prometheus (via prom-client, `/api/metrics`) |
+| CI | GitHub Actions — lint, typecheck, build, test |
 
 ---
 
@@ -107,6 +141,24 @@ The palette draws from night-match broadcast and Bloomberg terminal aesthetics.
 
 ---
 
+## REST API
+
+All endpoints run as Next.js Route Handlers in `apps/web/app/api/` — no separate
+Fastify server required. The frontend consumes these same endpoints.
+
+| Method | Path | Description |
+|--------|------|-------------|
+| GET | `/api/overview` | Tournament trust score + aggregate stats |
+| GET | `/api/matches` | Live match grid (`?status=flagged`, `?sort=margin`, `?limit=`, `?offset=`) |
+| GET | `/api/matches/:id` | Full market breakdown for one fixture |
+| GET | `/api/proof-feed` | Paginated proof feed (`?cursor=`, `?limit=`) |
+| GET | `/api/oracle/query/:fixtureId` | Agent-composable trust score (stable contract) |
+| GET | `/api/network-health` | Total checks, consistency rate, slot, agents |
+| GET | `/api/metrics` | Prometheus-formatted metrics |
+| GET | `/health` | Component health check (DB, Redis, last check) |
+
+**WebSocket**: `ws://host:3002/ws/proof-feed` — live streaming proof feed via Redis pub/sub.
+
 ## Getting Started
 
 ```bash
@@ -115,6 +167,37 @@ pnpm dev              # Start all workspace apps in development
 pnpm build            # Production build
 pnpm lint             # Run ESLint across all packages
 pnpm typecheck        # TypeScript type checking
+pnpm test             # Run all tests (consistency math)
+```
+
+### Start infrastructure (Postgres + Redis)
+
+```bash
+docker compose -f apps/backend/docker-compose.yml up -d postgres redis
+```
+
+### Start API + frontend
+
+```bash
+pnpm --filter @oddtrust/web dev
+```
+
+### Start worker (TxLINE ingestion + detection)
+
+```bash
+pnpm --filter @oddtrust/backend dev
+```
+
+### Start WebSocket server
+
+```bash
+pnpm --filter @oddtrust/web start:ws
+```
+
+### Full stack with Docker
+
+```bash
+docker compose -f apps/web/docker-compose.yml up --build
 ```
 
 Run only the web application:
