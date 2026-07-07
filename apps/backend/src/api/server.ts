@@ -41,7 +41,7 @@ export async function createServer() {
 
   await app.register(websocket);
 
-  app.setErrorHandler((error, _request, reply) => {
+  app.setErrorHandler((error: Error & { statusCode?: number }, _request, reply) => {
     log.error({ err: error }, 'Unhandled request error');
     const statusCode = error.statusCode ?? 500;
     reply.code(statusCode).send({

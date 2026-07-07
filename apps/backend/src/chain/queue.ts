@@ -68,7 +68,7 @@ export function startSubmissionWorker(): void {
       }
     },
     {
-      connection: redis,
+      connection: redis as any,
       concurrency: 5,
       lockDuration: 30000,
     },

@@ -4,7 +4,6 @@ import { createPostgresPool, runMigrations, closePostgresPool } from './lib/post
 import { createRedis, closeRedis } from './lib/redis.js';
 import { createSubmissionQueue, createQueueEvents, closeQueue } from './lib/queue.js';
 import { startSubmissionWorker, stopSubmissionWorker } from './chain/queue.js';
-import { startServer } from './api/server.js';
 import { TxLINEClient } from './ingestion/client.js';
 import { FixtureIngester } from './ingestion/fixtures.js';
 import { TxLINEStream } from './ingestion/stream.js';
@@ -15,7 +14,7 @@ async function main() {
   loadEnv();
   createLogger();
   const log = getLogger();
-  log.info('Starting OddsTrust backend');
+  log.info('Starting OddsTrust ingestion worker');
 
   const pool = createPostgresPool();
   const redis = createRedis();
@@ -25,8 +24,7 @@ async function main() {
   await redis.connect();
   await runMigrations();
 
-  const server = await startServer();
-
+  await submissionQueue.waitUntilReady();
   startSubmissionWorker();
 
   const txline = new TxLINEClient();
@@ -54,7 +52,7 @@ async function main() {
           type: m.type,
           odds: m.odds,
           last_update: msg.timestamp,
-          proof_ref: m.proof_ref ?? null,
+          proof_ref: m.proof_ref,
         })),
         snapshot_hash: oddsData.snapshot_hash,
         timestamp: msg.timestamp,
@@ -83,25 +81,24 @@ async function main() {
   });
 
   const gracefulShutdown = async (signal: string) => {
-    log.info({ signal }, 'Shutting down');
+    log.info({ signal }, 'Shutting down worker');
     stream.disconnect();
     await stopSubmissionWorker();
-    await server.close();
     await closeQueue();
     await closeRedis();
     await closePostgresPool();
-    log.info('Shutdown complete');
+    log.info('Worker shutdown complete');
     process.exit(0);
   };
 
   process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
   process.on('SIGINT', () => gracefulShutdown('SIGINT'));
 
-  log.info({ port: server.addresses() }, 'OddsTrust backend ready');
+  log.info('OddsTrust ingestion worker ready');
 }
 
 main().catch((err) => {
   const log = getLogger();
-  log.fatal({ err }, 'Fatal startup error');
+  log.fatal({ err }, 'Fatal worker startup error');
   process.exit(1);
 });

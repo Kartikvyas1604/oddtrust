@@ -10,7 +10,7 @@ let submissionQueueEvents: QueueEvents;
 export function createSubmissionQueue(): Queue {
   const redis = getRedis();
   submissionQueue = new Queue(SUBMISSION_QUEUE_NAME, {
-    connection: redis,
+    connection: redis as any,
     defaultJobOptions: {
       attempts: 5,
       backoff: { type: 'exponential', delay: 2000 },
@@ -23,7 +23,7 @@ export function createSubmissionQueue(): Queue {
 
 export function createQueueEvents(): QueueEvents {
   submissionQueueEvents = new QueueEvents(SUBMISSION_QUEUE_NAME, {
-    connection: getRedis(),
+    connection: getRedis() as any,
   });
   return submissionQueueEvents;
 }

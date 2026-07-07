@@ -1,5 +1,3 @@
-import type { Cluster } from '@solana/web3.js';
-
 export interface SubmissionJobData {
   checkId: string;
   fixtureId: string;
@@ -17,6 +15,6 @@ export interface SubmissionJobResult {
 
 export interface OracleConfig {
   programId: string;
-  cluster: Cluster;
+  cluster: 'devnet' | 'testnet' | 'mainnet-beta';
   rpcUrl: string;
 }

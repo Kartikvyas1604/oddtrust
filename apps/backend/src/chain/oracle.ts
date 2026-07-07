@@ -47,11 +47,11 @@ export class OracleClient {
         }),
       });
 
-      const result = await response.json();
+      const json = await response.json() as { result?: { context?: { slot?: number } } };
 
       return {
         signature: `oracle_${data.checkId.slice(0, 8)}_${Date.now()}`,
-        slot: result?.result?.context?.slot ?? 0,
+        slot: json?.result?.context?.slot ?? 0,
         blockTime: Math.floor(Date.now() / 1000),
       };
     } catch (err) {
