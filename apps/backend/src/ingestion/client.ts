@@ -19,7 +19,7 @@ const BASE_DELAY = 1000;
 export class TxLINEClient {
   private baseUrl: string;
   private guestToken: string | null = null;
-  private apiToken: string | null = null;
+  private _apiToken: string | null = null;
   private subscriptionId: string | null = null;
   private connected = false;
 
@@ -29,6 +29,11 @@ export class TxLINEClient {
 
   get isConnected(): boolean {
     return this.connected;
+  }
+
+  /** The API token obtained after subscribe(). Null until subscribe() succeeds. */
+  get apiToken(): string | null {
+    return this._apiToken;
   }
 
   async authenticate(): Promise<void> {
@@ -57,7 +62,7 @@ export class TxLINEClient {
     });
 
     this.subscriptionId = sub.subscription_id;
-    this.apiToken = sub.api_token;
+    this._apiToken = sub.api_token;
     this.connected = true;
     log.info({ subscriptionId: this.subscriptionId }, 'TxLINE subscription active');
   }

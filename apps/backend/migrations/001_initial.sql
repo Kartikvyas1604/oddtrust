@@ -26,7 +26,8 @@ CREATE TABLE odds_snapshots (
   snapshot_hash TEXT NOT NULL,
   txline_proof_ref TEXT,
   txline_timestamp TIMESTAMPTZ,
-  ingested_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+  ingested_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+  UNIQUE (fixture_id, market_type, snapshot_hash)
 );
 
 CREATE TABLE consistency_checks (

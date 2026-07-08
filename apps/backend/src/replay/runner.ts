@@ -1,4 +1,3 @@
-import '../config/env.js';
 import { loadEnv, getEnv } from '../config/env.js';
 import { createLogger, getLogger } from '../lib/logger.js';
 import { createPostgresPool, runMigrations, closePostgresPool } from '../lib/postgres.js';

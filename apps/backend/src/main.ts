@@ -9,6 +9,7 @@ import { FixtureIngester } from './ingestion/fixtures.js';
 import { TxLINEStream } from './ingestion/stream.js';
 import { DetectionPipeline } from './detection/pipeline.js';
 import { metricsRegistry } from './metrics/registry.js';
+import { startServer } from './api/server.js';
 
 async function main() {
   loadEnv();
@@ -35,8 +36,12 @@ async function main() {
   await ingester.syncAllFixtures();
   metricsRegistry.txlineConnectionStatus.set(1);
 
-  const stream = new TxLINEStream(txline['apiToken']!);
+  const stream = new TxLINEStream(txline.apiToken!);
   const pipeline = new DetectionPipeline(txline);
+
+  // Start the API server (REST + WebSocket)
+  const app = await startServer();
+  log.info('API server started');
 
   stream.onMessage(async (msg) => {
     if (msg.type === 'odds_update' && typeof msg.data === 'object' && msg.data !== null) {
@@ -85,6 +90,7 @@ async function main() {
     stream.disconnect();
     await stopSubmissionWorker();
     await closeQueue();
+    await app.close();
     await closeRedis();
     await closePostgresPool();
     log.info('Worker shutdown complete');

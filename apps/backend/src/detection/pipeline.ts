@@ -64,7 +64,7 @@ export class DetectionPipeline {
       const snapResult = await pool.query(
         `INSERT INTO odds_snapshots (fixture_id, market_type, raw_odds, implied_probabilities, bookmaker_margin, snapshot_hash, txline_proof_ref, txline_timestamp)
          VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
-         ON CONFLICT DO NOTHING`,
+         ON CONFLICT (fixture_id, market_type, snapshot_hash) DO NOTHING`,
         [
           odds.fixture_id,
           marketSet.join('+'),
