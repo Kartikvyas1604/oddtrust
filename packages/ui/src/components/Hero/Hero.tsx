@@ -23,13 +23,34 @@ function CountUp({ end, duration, suffix = "" }: { end: number; duration: number
 }
 
 export function Hero() {
+  const [stats, setStats] = useState<{
+    trustScore: number;
+    fixturesTracked: number;
+    totalChecks: number;
+    flaggedMarkets: number;
+  } | null>(null);
+
+  useEffect(() => {
+    fetch("/api/overview")
+      .then((r) => r.json())
+      .then((data) => {
+        setStats({
+          trustScore: data.trustScore ?? 0,
+          fixturesTracked: data.fixturesTracked ?? 0,
+          totalChecks: data.totalChecks ?? 0,
+          flaggedMarkets: data.flaggedMarkets ?? 0,
+        });
+      })
+      .catch(() => {});
+  }, []);
+
   return (
     <section className="relative py-16 text-center animate-fade-up opacity-0">
       <p className="text-xs font-mono text-text-secondary uppercase tracking-[0.15em] mb-3">
         Tournament Trust Score
       </p>
       <h1 className="text-7xl md:text-9xl font-[500] tracking-tight leading-none text-trophy-gold">
-        <CountUp end={97} duration={800} suffix="%" />
+        <CountUp end={stats?.trustScore ?? 0} duration={800} suffix="%" />
       </h1>
 
       <div className="mt-12 flex justify-center gap-4">
@@ -38,7 +59,7 @@ export function Hero() {
             <span className="inline-block w-2 h-2 rounded-full bg-text-tertiary" />
           </div>
           <p className="font-mono text-2xl text-text-primary mb-0.5">
-            <CountUp end={128} duration={800} />
+            <CountUp end={stats?.fixturesTracked ?? 0} duration={800} />
           </p>
           <p className="text-[11px] text-text-secondary uppercase tracking-wider">Matches Audited</p>
         </div>
@@ -47,7 +68,7 @@ export function Hero() {
             <span className="inline-block w-2 h-2 rounded-full bg-pitch-green" />
           </div>
           <p className="font-mono text-2xl text-pitch-green mb-0.5">
-            <CountUp end={114} duration={800} />
+            <CountUp end={stats?.totalChecks ?? 0} duration={800} />
           </p>
           <p className="text-[11px] text-text-secondary uppercase tracking-wider">Consistency Checks</p>
         </div>
@@ -56,7 +77,7 @@ export function Hero() {
             <span className="inline-block w-2 h-2 rounded-full bg-signal-amber" />
           </div>
           <p className="font-mono text-2xl text-signal-amber mb-0.5">
-            <CountUp end={14} duration={800} />
+            <CountUp end={stats?.flaggedMarkets ?? 0} duration={800} />
           </p>
           <p className="text-[11px] text-text-secondary uppercase tracking-wider">Inconsistencies Found</p>
         </div>

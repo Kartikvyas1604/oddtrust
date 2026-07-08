@@ -1,70 +1,123 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type Status = "verified" | "inconsistent" | "failed";
 
 interface Entry {
-  id: number;
-  slot: string;
-  fixture: string;
-  status: Status;
-  margin: string;
-  ts: string;
+  id: string;
+  fixtureId: string;
+  action: string;
+  margin: number | null;
+  signature: string | null;
+  slot: number | null;
+  loggedAt: string;
 }
 
-const allFixtures = [
-  "FC Zenith vs Atlas United", "Stormhaven vs Northgate",
-  "Ironbound vs Silverlake", "Crystal Palace vs Bridge City",
-  "Red Star vs Blue United", "Eastside vs Westend",
-  "Harbor FC vs Southside", "Valley United vs Crest Athletic",
-];
-
-const cfg: Record<Status, { label: string; cls: string }> = {
-  verified: { label: "Verified", cls: "text-pitch-green" },
-  inconsistent: { label: "Inconsistent", cls: "text-signal-amber" },
-  failed: { label: "Failed", cls: "text-signal-red" },
+const cfg: Record<string, { label: string; cls: string }> = {
+  CHECK_PASSED: { label: "Verified", cls: "text-pitch-green" },
+  CHECK_FLAGGED: { label: "Inconsistent", cls: "text-signal-amber" },
+  CHECK_FAILED: { label: "Failed", cls: "text-signal-red" },
 };
 
-function makeEntry(id: number): Entry {
-  const r = Math.random();
-  return {
-    id,
-    slot: String(284_391_882 + id),
-    fixture: allFixtures[Math.floor(Math.random() * allFixtures.length)],
-    status: r > 0.75 ? "failed" : r > 0.4 ? "verified" : "inconsistent",
-    margin: (70 + Math.random() * 30).toFixed(1),
-    ts: new Date().toLocaleTimeString("en-US", { hour12: false }),
-  };
+function mapAction(action: string): Status {
+  if (action === "CHECK_PASSED") return "verified";
+  if (action === "CHECK_FLAGGED") return "inconsistent";
+  return "failed";
 }
 
-function seed(n: number): Entry[] {
-  const out: Entry[] = [];
-  for (let i = 0; i < n; i++) {
-    const r = (i * 7 + 3) % 5;
-    out.push({
-      id: i,
-      slot: String(284_391_882 + i),
-      fixture: allFixtures[i % allFixtures.length],
-      status: r === 0 ? "failed" : r < 3 ? "verified" : "inconsistent",
-      margin: (85 + (i * 3) % 15).toFixed(1),
-      ts: `00:0${i + 1}:${String(12 + i).padStart(2, "0")}`,
-    });
-  }
-  return out;
-}
+const PAGE_SIZE = 25;
 
 export function ProofFeed() {
-  const [entries, setEntries] = useState<Entry[]>(() => seed(5));
-  const [count, setCount] = useState(5);
+  const [entries, setEntries] = useState<Entry[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [cursor, setCursor] = useState<string | null>(null);
+  const [hasMore, setHasMore] = useState(false);
+  const wsRef = useRef<WebSocket | null>(null);
+  const lastIdRef = useRef<string | null>(null);
+
+  const fetchPage = async (c?: string | null) => {
+    try {
+      const params = new URLSearchParams({ limit: String(PAGE_SIZE) });
+      if (c) params.set("cursor", c);
+      const res = await fetch(`/api/proof-feed?${params}`);
+      const data = await res.json();
+      return data;
+    } catch {
+      return { entries: [], pagination: { hasMore: false } };
+    }
+  };
 
   useEffect(() => {
-    const iv = setInterval(() => {
-      setCount((c) => c + 1);
-      setEntries((prev) => [makeEntry(count + 1), ...prev.slice(0, 49)]);
-    }, 4000);
-    return () => clearInterval(iv);
-  }, [count]);
+    fetchPage(null).then((data) => {
+      const items = data.entries ?? [];
+      setEntries(items);
+      if (items.length > 0) lastIdRef.current = items[0].id;
+      setHasMore(data.pagination?.hasMore ?? false);
+      setLoading(false);
+    });
+  }, []);
+
+  useEffect(() => {
+    const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+    const wsUrl = `${protocol}//${window.location.hostname}:3002`;
+    let reconnectTimer: ReturnType<typeof setTimeout>;
+    let ws: WebSocket | null = null;
+
+    function connect() {
+      ws = new WebSocket(wsUrl);
+      wsRef.current = ws;
+
+      ws.onmessage = (event) => {
+        try {
+          const msg = JSON.parse(event.data);
+          if (msg.type === "FLAGGED" || msg.type === "CHECK_PASSED" || msg.type === "CHECK_FLAGGED") {
+            const newEntry: Entry = {
+              id: msg.checkId ?? crypto.randomUUID(),
+              fixtureId: msg.fixtureId ?? "",
+              action: msg.type === "FLAGGED" ? "CHECK_FLAGGED" : msg.type,
+              margin: msg.margin ?? null,
+              signature: msg.signature ?? null,
+              slot: msg.slot ?? null,
+              loggedAt: msg.timestamp ?? new Date().toISOString(),
+            };
+            setEntries((prev) => {
+              if (prev.length > 0 && prev[0].id === newEntry.id) return prev;
+              return [newEntry, ...prev.slice(0, 99)];
+            });
+          }
+        } catch { /* ignore */ }
+      };
+
+      ws.onclose = () => {
+        reconnectTimer = setTimeout(connect, 3000);
+      };
+
+      ws.onerror = () => ws?.close();
+    }
+
+    connect();
+
+    return () => {
+      clearTimeout(reconnectTimer);
+      ws?.close();
+    };
+  }, []);
+
+  const loadMore = async () => {
+    if (!hasMore || loading) return;
+    setLoading(true);
+    const data = await fetchPage(cursor);
+    const items = data.entries ?? [];
+    setEntries((prev) => [...prev, ...items]);
+    if (items.length > 0) {
+      setCursor(items[items.length - 1].loggedAt);
+    }
+    setHasMore(data.pagination?.hasMore ?? false);
+    setLoading(false);
+  };
+
+  const displayEntries = entries.slice(0, PAGE_SIZE);
 
   return (
     <section>
@@ -81,19 +134,39 @@ export function ProofFeed() {
           <span className="font-mono text-[10px] text-text-tertiary w-[80px] text-right shrink-0">Status</span>
         </div>
         <div className="divide-y divide-line-hairline/50 max-h-[340px] overflow-y-auto">
-          {entries.map((e, i) => {
-            const s = cfg[e.status];
+          {displayEntries.length === 0 && (
+            <div className="px-4 py-6 text-center font-mono text-xs text-text-tertiary">
+              {loading ? "Loading..." : "No proof entries yet."}
+            </div>
+          )}
+          {displayEntries.map((e, i) => {
+            const status = mapAction(e.action);
+            const s = cfg[e.action] ?? cfg.CHECK_PASSED;
             return (
-              <div key={e.id} className={`flex items-center gap-3 px-4 py-2 ${i === 0 && e.id >= 5 ? "animate-feed-in" : ""}`}>
-                <span className="font-mono text-xs text-text-tertiary w-[70px] shrink-0">{e.slot}</span>
-                <span className="text-xs text-text-primary flex-1 truncate">{e.fixture}</span>
-                <span className="font-mono text-xs text-text-primary w-[60px] text-right shrink-0">{e.margin}%</span>
-                <span className="font-mono text-xs text-text-tertiary w-[80px] text-right shrink-0">{e.ts}</span>
+              <div key={e.id} className={`flex items-center gap-3 px-4 py-2 ${i === 0 && i >= 5 ? "animate-feed-in" : ""}`}>
+                <span className="font-mono text-xs text-text-tertiary w-[70px] shrink-0">
+                  {e.slot ? `#${e.slot}` : "---"}
+                </span>
+                <span className="text-xs text-text-primary flex-1 truncate">{e.fixtureId}</span>
+                <span className="font-mono text-xs text-text-primary w-[60px] text-right shrink-0">
+                  {e.margin !== null ? `${(e.margin * 100).toFixed(1)}%` : "---"}
+                </span>
+                <span className="font-mono text-xs text-text-tertiary w-[80px] text-right shrink-0">
+                  {new Date(e.loggedAt).toLocaleTimeString("en-US", { hour12: false })}
+                </span>
                 <span className={`font-mono text-xs ${s.cls} w-[80px] text-right shrink-0`}>{s.label}</span>
               </div>
             );
           })}
         </div>
+        {hasMore && (
+          <button
+            onClick={loadMore}
+            className="w-full px-4 py-2 font-mono text-xs text-text-secondary hover:text-text-primary bg-bg-raised hover:bg-bg-panel transition-colors border-t border-line-hairline"
+          >
+            Load more
+          </button>
+        )}
       </div>
     </section>
   );

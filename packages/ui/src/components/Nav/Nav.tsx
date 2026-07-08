@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 
 const links = [
   { label: "Oracle", href: "/oracle" },
@@ -12,6 +13,19 @@ const links = [
 
 export function Nav() {
   const pathname = usePathname();
+  const [slot, setSlot] = useState<number | null>(null);
+  const [error, setError] = useState(false);
+
+  useEffect(() => {
+    fetch("/api/network-health")
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.currentSlot) setSlot(data.currentSlot);
+      })
+      .catch(() => {
+        if (!error) setError(true);
+      });
+  }, [error]);
 
   return (
     <header className="relative flex items-center justify-between py-4 border-b border-line-hairline animate-fade-up opacity-0">
@@ -47,7 +61,9 @@ export function Nav() {
           <span className="hidden sm:inline">Oracle Active</span>
           <span className="sm:hidden">Live</span>
         </div>
-        <span className="hidden md:block text-xs text-text-tertiary">Slot 284,391,882</span>
+        <span className="hidden md:block text-xs text-text-tertiary">
+          {slot ? `#${slot.toLocaleString()}` : "---"}
+        </span>
       </div>
     </header>
   );

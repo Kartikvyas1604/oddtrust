@@ -1,13 +1,46 @@
-import { Hero, MatchGrid, GatePanel, ProofFeed } from "@oddtrust/ui";
+"use client";
 
-const healthStats = [
-  { label: "Total Checks", value: "24,598" },
-  { label: "Consistency Rate", value: "99.97%", accent: true },
-  { label: "Last Slot", value: "#310,442,891" },
-  { label: "Agents Connected", value: "7" },
-];
+import { Hero, MatchGrid, GatePanel, ProofFeed } from "@oddtrust/ui";
+import { useEffect, useState } from "react";
+
+interface HealthStat {
+  totalChecks: number;
+  consistencyRate: number;
+  currentSlot: number | null;
+  connectedAgents: number;
+}
+
+const defaults: HealthStat = {
+  totalChecks: 0,
+  consistencyRate: 0,
+  currentSlot: null,
+  connectedAgents: 0,
+};
 
 export default function Home() {
+  const [health, setHealth] = useState<HealthStat>(defaults);
+
+  useEffect(() => {
+    fetch("/api/network-health")
+      .then((r) => r.json())
+      .then((data) => {
+        setHealth({
+          totalChecks: data.totalChecks ?? 0,
+          consistencyRate: data.consistencyRate ?? 0,
+          currentSlot: data.currentSlot ?? null,
+          connectedAgents: data.connectedAgents ?? 0,
+        });
+      })
+      .catch(() => {});
+  }, []);
+
+  const stats = [
+    { label: "Total Checks", value: health.totalChecks.toLocaleString() },
+    { label: "Consistency Rate", value: `${health.consistencyRate.toFixed(2)}%`, accent: true },
+    { label: "Last Slot", value: health.currentSlot ? `#${health.currentSlot.toLocaleString()}` : "---" },
+    { label: "Agents Connected", value: String(health.connectedAgents) },
+  ];
+
   return (
     <>
       <Hero />
@@ -17,7 +50,7 @@ export default function Home() {
           Network Health
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-line-hairline rounded-lg overflow-hidden">
-          {healthStats.map((s) => (
+          {stats.map((s) => (
             <div key={s.label} className="bg-bg-raised p-6">
               <p className="text-[11px] text-text-secondary uppercase tracking-wider mb-1">{s.label}</p>
               <p className={`font-mono text-lg ${s.accent ? "text-pitch-green" : "text-text-primary"}`}>

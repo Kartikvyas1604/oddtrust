@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 type Status = "consistent" | "flagged" | "blocked";
 
@@ -13,20 +14,28 @@ export interface Fixture {
   lastChecked: string;
 }
 
-export const fixtures: Fixture[] = [
-  { id: "1", homeTeam: "FC Zenith", awayTeam: "Atlas United", status: "consistent", margin: 94.2, lastChecked: "12s ago" },
-  { id: "2", homeTeam: "Stormhaven", awayTeam: "Northgate", status: "flagged", margin: 67.8, lastChecked: "23s ago" },
-  { id: "3", homeTeam: "Ironbound FC", awayTeam: "Silverlake", status: "consistent", margin: 91.5, lastChecked: "5s ago" },
-  { id: "4", homeTeam: "Crystal Palace", awayTeam: "Bridge City", status: "blocked", margin: 22.1, lastChecked: "47s ago" },
-  { id: "5", homeTeam: "Red Star", awayTeam: "Blue United", status: "consistent", margin: 96.0, lastChecked: "2s ago" },
-  { id: "6", homeTeam: "Eastside FC", awayTeam: "Westend Athletic", status: "flagged", margin: 58.4, lastChecked: "34s ago" },
-];
+function mapConsistentToStatus(isConsistent: boolean | null): Status {
+  if (isConsistent === false) return "flagged";
+  if (isConsistent === true) return "consistent";
+  return "blocked";
+}
 
 const statusTheme: Record<Status, { label: string; text: string; dot: string; border: string }> = {
   consistent: { label: "Consistent", text: "text-pitch-green", dot: "bg-pitch-green", border: "border-line-hairline" },
   flagged: { label: "Flagged", text: "text-signal-amber", dot: "bg-signal-amber", border: "border-l-signal-amber border-line-hairline" },
   blocked: { label: "Blocked", text: "text-signal-red", dot: "bg-signal-red", border: "border-l-signal-red border-line-hairline" },
 };
+
+function relativeTime(dateStr: string | null): string {
+  if (!dateStr) return "never";
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const sec = Math.floor(diff / 1000);
+  if (sec < 5) return "just now";
+  if (sec < 60) return `${sec}s ago`;
+  const min = Math.floor(sec / 60);
+  if (min < 60) return `${min}m ago`;
+  return `${Math.floor(min / 60)}h ago`;
+}
 
 export function MatchCard({ fixture, delay = 0 }: { fixture: Fixture; delay?: number }) {
   const t = statusTheme[fixture.status];
@@ -46,15 +55,46 @@ export function MatchCard({ fixture, delay = 0 }: { fixture: Fixture; delay?: nu
           <span className={`inline-block w-1.5 h-1.5 rounded-full ${t.dot}`} />
           {t.label}
         </span>
-        <span className="font-mono text-xs text-text-primary">{fixture.margin}%</span>
+        <span className="font-mono text-xs text-text-primary">{fixture.margin.toFixed(1)}%</span>
       </div>
       <p className="font-mono text-[10px] text-text-tertiary mt-3">Checked {fixture.lastChecked}</p>
     </Link>
   );
 }
 
+interface ApiMatch {
+  id: string;
+  homeTeam: string;
+  awayTeam: string;
+  isConsistent: boolean | null;
+  latestMargin: number | null;
+  lastCheckTime: string | null;
+}
+
 export function MatchGrid({ preview }: { preview?: boolean }) {
-  const items = preview ? fixtures.slice(0, 6) : fixtures;
+  const [matches, setMatches] = useState<ApiMatch[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const params = preview ? "?limit=6&sort=recent" : "?limit=50&sort=margin";
+    fetch(`/api/matches${params}`)
+      .then((r) => r.json())
+      .then((data) => {
+        setMatches(data.matches ?? []);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [preview]);
+
+  const items: Fixture[] = matches.map((m) => ({
+    id: m.id,
+    homeTeam: m.homeTeam,
+    awayTeam: m.awayTeam,
+    status: mapConsistentToStatus(m.isConsistent),
+    margin: m.latestMargin ?? 0,
+    lastChecked: relativeTime(m.lastCheckTime),
+  }));
+
   return (
     <section>
       <div className="flex items-center justify-between mb-5">
@@ -68,9 +108,21 @@ export function MatchGrid({ preview }: { preview?: boolean }) {
         )}
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+        {loading && Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="bg-bg-raised border border-line-hairline rounded-lg p-6 animate-pulse">
+            <div className="h-4 bg-bg-void rounded w-3/4 mb-3" />
+            <div className="h-4 bg-bg-void rounded w-1/2 mb-3" />
+            <div className="h-3 bg-bg-void rounded w-1/3" />
+          </div>
+        ))}
         {items.map((f, i) => (
           <MatchCard key={f.id} fixture={f} delay={700 + i * 80} />
         ))}
+        {!loading && items.length === 0 && (
+          <p className="col-span-full text-center font-mono text-xs text-text-tertiary py-8">
+            No matches tracked yet.
+          </p>
+        )}
       </div>
     </section>
   );
