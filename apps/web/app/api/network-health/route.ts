@@ -39,8 +39,8 @@ export async function GET() {
     const [totalResult, consistentResult, slotResult, txlineResult] = await Promise.all([
       pool.query('SELECT COUNT(*) as count FROM consistency_checks'),
       pool.query('SELECT COUNT(*) as count FROM consistency_checks WHERE is_consistent = true'),
-      pool.query('SELECT MAX(on_chain_slot) as latest_slot FROM proof_log WHERE on_chain_slot IS NOT NULL'),
-      pool.query(`SELECT MAX(ingested_at) as ts FROM odds_snapshots WHERE ingested_at > NOW() - INTERVAL '5 minutes'`),
+      pool.query('SELECT MAX(slot) as latest_slot FROM proof_log WHERE slot IS NOT NULL'),
+      pool.query(`SELECT MAX(created_at) as ts FROM odds_snapshots WHERE created_at > NOW() - INTERVAL '5 minutes'`),
     ]);
 
     const totalChecks = parseInt(totalResult.rows[0].count, 10);
@@ -52,12 +52,23 @@ export async function GET() {
     const wsCount = await redis.get('metrics:ws-connections');
     const connectedAgents = parseInt(wsCount || '0', 10);
 
+    let queueDepth = 0;
+    try {
+      const { getSubmissionQueue } = await import('../../../lib/worker/queue');
+      const queue = getSubmissionQueue();
+      const counts = await queue.getJobCounts();
+      queueDepth = (counts.waiting || 0) + (counts.active || 0);
+    } catch {
+      queueDepth = -1;
+    }
+
     const health = {
       totalChecks,
       consistencyRate,
       currentSlot,
       connectedAgents,
       txlineConnected,
+      queueDepth,
       networkStatus: txlineConnected ? 'operational' : 'degraded',
       updatedAt: new Date().toISOString(),
     };
