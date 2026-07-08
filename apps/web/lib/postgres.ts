@@ -50,7 +50,7 @@ export async function runMigrations(migrationsDir: string): Promise<void> {
     const { rows } = await client.query('SELECT name FROM _migrations ORDER BY id');
     const applied = new Set(rows.map((r: { name: string }) => r.name));
 
-    const migrationFiles = ['001_initial.sql'];
+    const migrationFiles = ['001_initial.sql', '002_oracle_worker.sql'];
 
     for (const file of migrationFiles) {
       const name = file.replace('.sql', '');
