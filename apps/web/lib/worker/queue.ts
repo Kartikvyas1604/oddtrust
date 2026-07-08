@@ -6,14 +6,12 @@ import { OracleClient } from './oracle-client';
 import type { SubmissionJobData, SubmissionJobResult } from './types';
 
 const QUEUE_NAME = 'onchain-submissions';
-const CONNECTION = { url: '' };
 
 let submissionQueue: Queue<SubmissionJobData, SubmissionJobResult> | null = null;
 let queueEvents: QueueEvents | null = null;
 
-function getConnection(): { host: string; port: number; url: string } {
-  const url = getEnv().REDIS_URL;
-  return { url, host: 'localhost', port: 6379 };
+function getConnection(): { url: string } {
+  return { url: getEnv().REDIS_URL };
 }
 
 export function createSubmissionQueue(): Queue<SubmissionJobData, SubmissionJobResult> {

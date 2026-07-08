@@ -5,10 +5,54 @@ import { getLogger } from '../logger';
 import { checkConsistency } from './consistency';
 import type { ConsistencyCheckResult, MarketOdds } from './types';
 
+interface CoveringSetConfigEntry {
+  id: number;
+  markets: string[];
+  created_at: string;
+}
+
+const DEFAULT_COVERING_SETS: string[][] = [
+  ['match_winner'],
+  ['double_chance'],
+  ['match_winner', 'double_chance'],
+];
+
+const COVERING_SETS_CACHE_TTL = 300_000;
+const COVERING_SETS_CACHE_KEY = 'pipeline:covering_sets';
+
 export class DetectionPipeline {
   private processedSnapshots = new Set<string>();
+  private coveringSetsCache: { timestamp: number; sets: string[][] } | null = null;
 
   constructor(private readonly maxCacheSize = 10000) {}
+
+  private async loadCoveringSets(): Promise<string[][]> {
+    if (
+      this.coveringSetsCache &&
+      Date.now() - this.coveringSetsCache.timestamp < COVERING_SETS_CACHE_TTL
+    ) {
+      return this.coveringSetsCache.sets;
+    }
+
+    try {
+      const pool = getPostgresPool();
+      const result = await pool.query(
+        `SELECT value FROM oracle_config WHERE key = 'covering_sets'`,
+      );
+      if (result.rows.length > 0) {
+        const parsed = JSON.parse(result.rows[0].value) as string[][];
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          this.coveringSetsCache = { timestamp: Date.now(), sets: parsed };
+          return parsed;
+        }
+      }
+    } catch {
+      /* use defaults */
+    }
+
+    this.coveringSetsCache = { timestamp: Date.now(), sets: DEFAULT_COVERING_SETS };
+    return DEFAULT_COVERING_SETS;
+  }
 
   async processOddsUpdate(data: Record<string, unknown>): Promise<ConsistencyCheckResult | null> {
     const log = getLogger();
@@ -25,7 +69,7 @@ export class DetectionPipeline {
     }
 
     this.processedSnapshots.add(oddsSnapshotHash);
-  if (this.processedSnapshots.size > this.maxCacheSize) {
+    if (this.processedSnapshots.size > this.maxCacheSize) {
       const entries = this.processedSnapshots.values();
       for (let i = 0; i < 1000; i++) {
         const entry = entries.next();
@@ -40,13 +84,14 @@ export class DetectionPipeline {
     }));
 
     const marketTypes = parsedMarkets.map((m) => m.type);
+    const coveringSets = await this.loadCoveringSets();
+    const available = coveringSets.filter((set) => set.every((m) => marketTypes.includes(m)));
 
-    const coveringSets = this.selectCoveringSets(marketTypes);
-    if (coveringSets.length === 0) {
+    if (available.length === 0) {
       return null;
     }
 
-    const selectedMarketTypes = coveringSets[0];
+    const selectedMarketTypes = available[0];
     const result = checkConsistency(
       fixtureId,
       parsedMarkets,
@@ -109,16 +154,8 @@ export class DetectionPipeline {
     return crypto.createHash('sha256').update(sorted).digest('hex').slice(0, 16);
   }
 
-  private selectCoveringSets(available: string[]): string[][] {
-    const COVERING_SETS: string[][] = [
-      ['match_winner'],
-      ['double_chance'],
-      ['match_winner', 'double_chance'],
-    ];
-    return COVERING_SETS.filter((set) => set.every((m) => available.includes(m)));
-  }
-
   clearCache(): void {
     this.processedSnapshots.clear();
+    this.coveringSetsCache = null;
   }
 }

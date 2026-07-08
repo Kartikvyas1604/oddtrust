@@ -71,35 +71,6 @@ export interface ConsistencyCheckResult {
   txlineProofRef: string | null;
 }
 
-export const MARKET_CATEGORIES: Record<string, string[]> = {
-  'match_winner': ['home', 'draw', 'away'],
-  'double_chance': ['1X', '12', '2X'],
-  'over_under_0.5': ['over', 'under'],
-  'over_under_1.5': ['over', 'under'],
-  'over_under_2.5': ['over', 'under'],
-  'over_under_3.5': ['over', 'under'],
-  'over_under_4.5': ['over', 'under'],
-  'both_teams_score': ['yes', 'no'],
-  'correct_score': [],
-};
-
-export const COVERING_SETS: string[][] = [
-  ['match_winner'],
-  ['double_chance'],
-  ['over_under_0.5'],
-  ['over_under_1.5'],
-  ['over_under_2.5'],
-  ['over_under_3.5'],
-  ['over_under_4.5'],
-  ['both_teams_score'],
-];
-
-export const SINGLE_OUTCOME_SETS: string[][] = [
-  ['match_winner'],
-  ['double_chance'],
-  ['both_teams_score'],
-];
-
 export interface TxLINEHistoricalQuery {
   fixture_id: string;
   from?: string;

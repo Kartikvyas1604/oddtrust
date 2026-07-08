@@ -1,0 +1,637 @@
+{
+  "address": "HooVY5etEhNnPWouvZhzGCgbTjBfk3mff66S8jFgaAit",
+  "metadata": {
+    "name": "oddtrust_oracle",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Created with Anchor"
+  },
+  "instructions": [
+    {
+      "name": "initialize_config",
+      "discriminator": [
+        208,
+        127,
+        21,
+        1,
+        194,
+        190,
+        196,
+        70
+      ],
+      "accounts": [
+        {
+          "name": "payer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "authority",
+          "type": "pubkey"
+        },
+        {
+          "name": "backend_signer",
+          "type": "pubkey"
+        }
+      ]
+    },
+    {
+      "name": "query_trust",
+      "discriminator": [
+        185,
+        43,
+        123,
+        219,
+        143,
+        76,
+        27,
+        112
+      ],
+      "accounts": [
+        {
+          "name": "fixture_trust",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  102,
+                  105,
+                  120,
+                  116,
+                  117,
+                  114,
+                  101
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "fixture_id"
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "fixture_id",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "submit_check",
+      "discriminator": [
+        164,
+        75,
+        13,
+        38,
+        143,
+        157,
+        192,
+        80
+      ],
+      "accounts": [
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "backend_signer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "fixture_trust",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  102,
+                  105,
+                  120,
+                  116,
+                  117,
+                  114,
+                  101
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "fixture_id"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "fixture_id",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        },
+        {
+          "name": "is_consistent",
+          "type": "bool"
+        },
+        {
+          "name": "margin_bps",
+          "type": "i32"
+        },
+        {
+          "name": "txline_proof_ref",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "trading_agent_check",
+      "discriminator": [
+        170,
+        179,
+        85,
+        242,
+        206,
+        237,
+        27,
+        18
+      ],
+      "accounts": [
+        {
+          "name": "agent",
+          "docs": [
+            "The agent executing the check. In production this would be a program",
+            "calling via CPI; here we use a signer for direct invocation."
+          ],
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "fixture_trust",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  102,
+                  105,
+                  120,
+                  116,
+                  117,
+                  114,
+                  101
+                ]
+              },
+              {
+                "kind": "arg",
+                "path": "fixture_id"
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "fixture_id",
+          "type": {
+            "array": [
+              "u8",
+              32
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "FixtureTrust",
+      "discriminator": [
+        31,
+        185,
+        89,
+        49,
+        110,
+        8,
+        93,
+        215
+      ]
+    },
+    {
+      "name": "OracleConfig",
+      "discriminator": [
+        133,
+        196,
+        152,
+        50,
+        27,
+        21,
+        145,
+        254
+      ]
+    }
+  ],
+  "events": [
+    {
+      "name": "AgentCheckExecuted",
+      "discriminator": [
+        147,
+        216,
+        165,
+        96,
+        166,
+        235,
+        84,
+        56
+      ]
+    },
+    {
+      "name": "CheckSubmitted",
+      "discriminator": [
+        122,
+        127,
+        66,
+        92,
+        27,
+        145,
+        106,
+        204
+      ]
+    },
+    {
+      "name": "ConfigInitialized",
+      "discriminator": [
+        181,
+        49,
+        200,
+        156,
+        19,
+        167,
+        178,
+        91
+      ]
+    },
+    {
+      "name": "TrustQueried",
+      "discriminator": [
+        159,
+        200,
+        91,
+        145,
+        20,
+        250,
+        20,
+        245
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "ConfigAlreadyInitialized",
+      "msg": "Config already initialized"
+    },
+    {
+      "code": 6001,
+      "name": "ConfigNotInitialized",
+      "msg": "Config not initialized"
+    },
+    {
+      "code": 6002,
+      "name": "UnauthorizedSubmitter",
+      "msg": "Only the backend signer can submit checks"
+    },
+    {
+      "code": 6003,
+      "name": "FixtureNotFound",
+      "msg": "Fixture trust data not found"
+    },
+    {
+      "code": 6004,
+      "name": "MarginOutOfRange",
+      "msg": "Margin exceeds maximum allowed"
+    },
+    {
+      "code": 6005,
+      "name": "CheckCountOverflow",
+      "msg": "Check count exceeds maximum allowed"
+    },
+    {
+      "code": 6006,
+      "name": "InvalidFixtureId",
+      "msg": "Fixture id must be exactly 32 bytes"
+    },
+    {
+      "code": 6007,
+      "name": "InvalidProofRef",
+      "msg": "Proof ref must be exactly 32 bytes"
+    }
+  ],
+  "types": [
+    {
+      "name": "AgentCheckExecuted",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "fixture_id",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "is_consistent",
+            "type": "bool"
+          },
+          {
+            "name": "margin_bps",
+            "type": "i32"
+          },
+          {
+            "name": "decision",
+            "type": {
+              "defined": {
+                "name": "AgentDecision"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "AgentDecision",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Executed"
+          },
+          {
+            "name": "Blocked"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CheckSubmitted",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "fixture_id",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "is_consistent",
+            "type": "bool"
+          },
+          {
+            "name": "margin_bps",
+            "type": "i32"
+          },
+          {
+            "name": "slot",
+            "type": "u64"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          },
+          {
+            "name": "txline_proof_ref",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "check_count",
+            "type": "u32"
+          },
+          {
+            "name": "backend_signer",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ConfigInitialized",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "backend_signer",
+            "type": "pubkey"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "FixtureTrust",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "fixture_id",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "is_consistent",
+            "type": "bool"
+          },
+          {
+            "name": "margin_bps",
+            "type": "i32"
+          },
+          {
+            "name": "last_checked_slot",
+            "type": "u64"
+          },
+          {
+            "name": "last_checked_timestamp",
+            "type": "i64"
+          },
+          {
+            "name": "txline_proof_ref",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "check_count",
+            "type": "u32"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "OracleConfig",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "authority",
+            "type": "pubkey"
+          },
+          {
+            "name": "backend_signer",
+            "type": "pubkey"
+          },
+          {
+            "name": "total_checks",
+            "type": "u64"
+          },
+          {
+            "name": "total_inconsistencies",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "TrustQueried",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "fixture_id",
+            "type": {
+              "array": [
+                "u8",
+                32
+              ]
+            }
+          },
+          {
+            "name": "is_consistent",
+            "type": "bool"
+          },
+          {
+            "name": "margin_bps",
+            "type": "i32"
+          },
+          {
+            "name": "timestamp",
+            "type": "i64"
+          }
+        ]
+      }
+    }
+  ],
+  "constants": [
+    {
+      "name": "FIXTURE_TRUST_SEED",
+      "type": "bytes",
+      "value": "[102, 105, 120, 116, 117, 114, 101]"
+    },
+    {
+      "name": "MAX_CHECK_COUNT",
+      "type": "u32",
+      "value": "1000000"
+    },
+    {
+      "name": "MAX_MARGIN_BPS",
+      "type": "i32",
+      "value": "10000"
+    },
+    {
+      "name": "ORACLE_CONFIG_SEED",
+      "type": "bytes",
+      "value": "[99, 111, 110, 102, 105, 103]"
+    }
+  ]
+}

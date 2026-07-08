@@ -1,3 +1,4 @@
+import crypto from 'node:crypto';
 import { NextRequest, NextResponse } from 'next/server';
 import { ensureInit } from '../../../lib/init';
 import { getPostgresPool } from '../../../lib/postgres';
@@ -46,7 +47,10 @@ export async function POST(request: NextRequest) {
     }
 
     const { fixtureId, markets, marketTypes } = parsed.data;
-    const oddsSnapshotHash = `snap_${Date.now()}`;
+    const oddsSnapshotHash = crypto.createHash('sha256')
+      .update(JSON.stringify({ fixtureId, markets, marketTypes, t: Date.now() }))
+      .digest('hex')
+      .slice(0, 16);
 
     const result = checkConsistency(fixtureId, markets, marketTypes, oddsSnapshotHash);
 
