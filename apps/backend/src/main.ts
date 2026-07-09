@@ -19,15 +19,43 @@ async function main() {
 
   const pool = createPostgresPool();
   const redis = createRedis();
-  const submissionQueue = createSubmissionQueue();
-  createQueueEvents();
-
   await redis.connect();
   await runMigrations();
+
+  const app = await startServer();
+  log.info('API server started');
+
+  const submissionQueue = createSubmissionQueue();
+  createQueueEvents();
 
   await submissionQueue.waitUntilReady();
   startSubmissionWorker();
 
+  // Start TxLINE connection in background — non-blocking so API is available immediately
+  initializeTxLINE().catch((err) => {
+    log.error({ err }, 'TxLINE initialization failed (API remains available)');
+    metricsRegistry.txlineConnectionStatus.set(0);
+  });
+
+  const gracefulShutdown = async (signal: string) => {
+    log.info({ signal }, 'Shutting down worker');
+    await stopSubmissionWorker();
+    await closeQueue();
+    await app.close();
+    await closeRedis();
+    await closePostgresPool();
+    log.info('Worker shutdown complete');
+    process.exit(0);
+  };
+
+  process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+  process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
+  log.info('OddsTrust ingestion worker ready');
+}
+
+async function initializeTxLINE() {
+  const log = getLogger();
   const txline = new TxLINEClient();
   await txline.authenticate();
   await txline.subscribe();
@@ -38,10 +66,6 @@ async function main() {
 
   const stream = new TxLINEStream(txline.apiToken!);
   const pipeline = new DetectionPipeline(txline);
-
-  // Start the API server (REST + WebSocket)
-  const app = await startServer();
-  log.info('API server started');
 
   stream.onMessage(async (msg) => {
     if (msg.type === 'odds_update' && typeof msg.data === 'object' && msg.data !== null) {
@@ -84,23 +108,6 @@ async function main() {
     log.error({ err }, 'Failed to connect TxLINE stream');
     metricsRegistry.txlineConnectionStatus.set(0);
   });
-
-  const gracefulShutdown = async (signal: string) => {
-    log.info({ signal }, 'Shutting down worker');
-    stream.disconnect();
-    await stopSubmissionWorker();
-    await closeQueue();
-    await app.close();
-    await closeRedis();
-    await closePostgresPool();
-    log.info('Worker shutdown complete');
-    process.exit(0);
-  };
-
-  process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
-  process.on('SIGINT', () => gracefulShutdown('SIGINT'));
-
-  log.info('OddsTrust ingestion worker ready');
 }
 
 main().catch((err) => {
