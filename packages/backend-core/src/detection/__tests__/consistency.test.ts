@@ -227,6 +227,154 @@ describe('checkConsistency — known fixture scenarios', () => {
     expect(result.margin).toBeCloseTo(totalImplied - 1, 6);
   });
 
+  it('EXACT THRESHOLD: Σ(1/odds) = 1.0 exactly (fair odds, no arbitrage, no margin)', () => {
+    const markets: MarketOdds[] = [
+      {
+        type: 'match_winner',
+        outcomes: { home: 2.0, draw: 4.0, away: 4.0 },
+      },
+    ];
+    // Σ = 1/2.0 + 1/4.0 + 1/4.0 = 0.5 + 0.25 + 0.25 = 1.0
+    const result = checkConsistency('fixture-exact', markets, ['match_winner'], 'hash-exact');
+    expect(result.summedImpliedProbability).toBeCloseTo(1.0, 6);
+    expect(result.isConsistent).toBe(true);
+    expect(result.margin).toBeCloseTo(0.0, 6);
+    expect(result.optimalStakes).toBeNull();
+  });
+
+  it('ARBITRAGE: Σ(1/odds) = 0.9 (clear 10% arbitrage opportunity)', () => {
+    const markets: MarketOdds[] = [
+      {
+        type: 'match_winner',
+        outcomes: {
+          home: 3.333333,
+          draw: 5.0,
+          away: 3.333333,
+        },
+      },
+    ];
+    // Σ = 1/3.333333 + 1/5.0 + 1/3.333333
+    //   = 0.3 + 0.2 + 0.3 = 0.8
+    const result = checkConsistency('fixture-arb', markets, ['match_winner'], 'hash-arb');
+    expect(result.isConsistent).toBe(false);
+    expect(result.summedImpliedProbability).toBeLessThan(1);
+    expect(result.optimalStakes).not.toBeNull();
+    // Optimal stakes should sum to 1.0
+    const stakeTotal = Object.values(result.optimalStakes!['match_winner']).reduce((s, v) => s + v, 0);
+    expect(stakeTotal).toBeCloseTo(1.0, 4);
+  });
+
+  it('105% MARGIN: Σ(1/odds) = 1.05 (industry-standard overround boundary)', () => {
+    const odds = { home: 2.0, draw: 3.333333, away: 4.0 };
+    // Target: Σ = 1.05
+    // 1/2.0 = 0.5
+    // 1/3.333333 = 0.3
+    // 1/4.0 = 0.25
+    // Σ = 1.05
+    const markets: MarketOdds[] = [
+      {
+        type: 'match_winner',
+        outcomes: odds,
+      },
+    ];
+    const result = checkConsistency('fixture-105', markets, ['match_winner'], 'hash-105');
+    const expectedSip = 1 / 2.0 + 1 / 3.333333 + 1 / 4.0;
+    expect(result.summedImpliedProbability).toBeCloseTo(expectedSip, 4);
+    expect(result.isConsistent).toBe(true);
+    expect(result.margin).toBeCloseTo(expectedSip - 1, 4);
+  });
+
+  it('VERY CLOSE TO BOUNDARY: Σ(1/odds) = 0.999 (sub-threshold, should flag arbitrage)', () => {
+    // Need odds such that sum is just under 1.0
+    // For match_winner: need 1/home + 1/draw + 1/away = 0.999
+    // Using: home=2.1, draw=3.5, away=3.6
+    // 1/2.1 = 0.476190...
+    // 1/3.5 = 0.285714...
+    // 1/3.6 = 0.277778...
+    // Σ = 1.039682... hmm that's > 1
+    // Let me adjust to get just under 1:
+    // home=3.0, draw=4.0, away=3.0
+    // 1/3.0 + 1/4.0 + 1/3.0 = 0.3333 + 0.25 + 0.3333 = 0.9167 (too low)
+    // home=2.5, draw=3.0, away=3.0
+    // 0.4 + 0.3333 + 0.3333 = 1.0667 (too high)
+    // home=2.7, draw=3.2, away=3.2
+    // 0.37037 + 0.3125 + 0.3125 = 0.99537 (just under!)
+    const markets: MarketOdds[] = [
+      {
+        type: 'match_winner',
+        outcomes: { home: 2.7, draw: 3.2, away: 3.2 },
+      },
+    ];
+    const result = checkConsistency('fixture-close', markets, ['match_winner'], 'hash-close');
+    expect(result.isConsistent).toBe(false);
+    expect(result.summedImpliedProbability).toBeLessThan(1);
+    expect(result.optimalStakes).not.toBeNull();
+  });
+
+  it('HIGH MARGIN: Σ(1/odds) = 1.30 (30% bookmaker margin, common in some markets)', () => {
+    const markets: MarketOdds[] = [
+      {
+        type: 'match_winner',
+        outcomes: { home: 1.5, draw: 4.0, away: 6.0 },
+      },
+    ];
+    // Σ = 1/1.5 + 1/4.0 + 1/6.0 = 0.6667 + 0.25 + 0.1667 = 1.0833
+    const expectedSip = 1 / 1.5 + 1 / 4.0 + 1 / 6.0;
+    const result = checkConsistency('fixture-high-margin', markets, ['match_winner'], 'hash-high');
+    expect(result.isConsistent).toBe(true);
+    expect(result.summedImpliedProbability).toBeCloseTo(expectedSip, 4);
+    expect(result.optimalStakes).toBeNull();
+  });
+
+  it('TWO-OUTCOME MARKET: both_teams_score consistent case', () => {
+    const markets: MarketOdds[] = [
+      {
+        type: 'both_teams_score',
+        outcomes: { yes: 1.8, no: 1.95 },
+      },
+    ];
+    // Σ = 1/1.8 + 1/1.95 = 0.5556 + 0.5128 = 1.0684 (consistent)
+    const result = checkConsistency('fixture-bts-2', markets, ['both_teams_score'], 'hash-bts2');
+    expect(result.isConsistent).toBe(true);
+    expect(result.summedImpliedProbability).toBeGreaterThan(1);
+  });
+
+  it('TWO-OUTCOME ARBITRAGE: both_teams_score with arbitrage', () => {
+    const markets: MarketOdds[] = [
+      {
+        type: 'both_teams_score',
+        outcomes: { yes: 2.2, no: 2.0 },
+      },
+    ];
+    // Σ = 1/2.2 + 1/2.0 = 0.4545 + 0.5 = 0.9545 (< 1, arbitrage)
+    const result = checkConsistency('fixture-bts-arb', markets, ['both_teams_score'], 'hash-bts-arb');
+    expect(result.isConsistent).toBe(false);
+    expect(result.summedImpliedProbability).toBeLessThan(1);
+  });
+
+  it('MULTI-MARKET: cross-market arbitrage detection', () => {
+    const markets: MarketOdds[] = [
+      { type: 'match_winner', outcomes: { home: 2.1, draw: 3.4, away: 3.8 } },
+      { type: 'over_under_2.5', outcomes: { over: 2.2, under: 1.7 } },
+      { type: 'both_teams_score', outcomes: { yes: 1.9, no: 1.9 } },
+    ];
+    const mwResult = checkConsistency('fixture-cross', markets, ['match_winner'], 'hash-cross');
+    const ouResult = checkConsistency('fixture-cross', markets, ['over_under_2.5'], 'hash-cross');
+    const btsResult = checkConsistency('fixture-cross', markets, ['both_teams_score'], 'hash-cross');
+
+    // match_winner: 1/2.1 + 1/3.4 + 1/3.8 = 0.47619 + 0.29412 + 0.26316 = 1.03347
+    expect(mwResult.summedImpliedProbability).toBeGreaterThan(1);
+    expect(mwResult.isConsistent).toBe(true);
+
+    // over_under_2.5: 1/2.2 + 1/1.7 = 0.45455 + 0.58824 = 1.04279
+    expect(ouResult.summedImpliedProbability).toBeGreaterThan(1);
+    expect(ouResult.isConsistent).toBe(true);
+
+    // both_teams_score: 1/1.9 + 1/1.9 = 0.52632 + 0.52632 = 1.05263
+    expect(btsResult.summedImpliedProbability).toBeGreaterThan(1);
+    expect(btsResult.isConsistent).toBe(true);
+  });
+
   it('handles complete market coverage with all outcome sets', () => {
     const markets: MarketOdds[] = [
       { type: 'match_winner', outcomes: { home: 2.0, draw: 3.5, away: 4.0 } },
