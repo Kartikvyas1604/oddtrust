@@ -14,7 +14,7 @@ const links = [
 export function Nav() {
   const pathname = usePathname();
   const [slot, setSlot] = useState<number | null>(null);
-  const [error, setError] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
   useEffect(() => {
     fetch("/api/network-health")
@@ -22,48 +22,73 @@ export function Nav() {
       .then((data) => {
         if (data.currentSlot) setSlot(data.currentSlot);
       })
-      .catch(() => {
-        if (!error) setError(true);
-      });
-  }, [error]);
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    const onScroll = () => setScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   return (
-    <header className="relative flex items-center justify-between py-5 border-b border-line-hairline animate-fade-up opacity-0">
-      <Link
-        href="/"
-        className="text-xl font-[500] tracking-tight text-text-primary hover:text-pitch-green transition-colors no-underline"
-      >
-        Odds<span className="text-pitch-green">Trust</span>
-      </Link>
+    <header
+      className={`sticky top-0 z-50 transition-all duration-300 ${
+        scrolled
+          ? "bg-bg-void/80 backdrop-blur-xl border-b border-line-hairline/60 shadow-[0_1px_3px_rgba(0,0,0,0.3)]"
+          : "bg-transparent border-b border-line-hairline/30"
+      }`}
+    >
+      <div className="mx-auto max-w-[1440px] px-6 lg:px-12 flex items-center justify-between h-16">
+        {/* Wordmark */}
+        <Link
+          href="/"
+          className="flex items-center gap-0.5 text-xl font-[600] tracking-tight text-text-primary hover:opacity-80 transition-opacity no-underline shrink-0"
+        >
+          <span>Odds</span>
+          <span className="text-pitch-green">Trust</span>
+        </Link>
 
-      <nav className="absolute left-1/2 -translate-x-1/2 flex items-center gap-7">
-        {links.map((l) => {
-          const active = l.href === "/matches" ? pathname.startsWith("/matches") : pathname === l.href;
-          return (
-            <Link
-              key={l.href}
-              href={l.href}
-              className={`shrink-0 text-sm no-underline whitespace-nowrap transition-colors ${
-                active
-                  ? "text-text-primary font-[500] border-b border-pitch-green pb-0.5"
-                  : "text-text-secondary hover:text-text-primary"
-              }`}
-            >
-              {l.label}
-            </Link>
-          );
-        })}
-      </nav>
+        {/* Center nav */}
+        <nav className="absolute left-1/2 -translate-x-1/2 hidden md:flex items-center gap-1">
+          {links.map((l) => {
+            const active =
+              l.href === "/matches"
+                ? pathname.startsWith("/matches")
+                : pathname === l.href;
+            return (
+              <Link
+                key={l.href}
+                href={l.href}
+                className={`relative px-3.5 py-1.5 text-sm rounded-md transition-all duration-200 no-underline whitespace-nowrap ${
+                  active
+                    ? "text-text-primary font-[500] bg-bg-raised/80"
+                    : "text-text-secondary hover:text-text-primary hover:bg-bg-raised/40"
+                }`}
+              >
+                {l.label}
+                {active && (
+                  <span className="absolute inset-x-3.5 -bottom-[13px] h-[2px] bg-pitch-green rounded-full" />
+                )}
+              </Link>
+            );
+          })}
+        </nav>
 
-      <div className="flex items-center gap-4 font-mono">
-        <div className="flex items-center gap-2 text-sm text-pitch-green">
-          <span className="inline-block w-2 h-2 rounded-full bg-pitch-green animate-pulse-dot" />
-          <span className="hidden sm:inline">Oracle Active</span>
-          <span className="sm:hidden">Live</span>
+        {/* Right side — live indicator */}
+        <div className="flex items-center gap-3 shrink-0">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-full border border-line-hairline/50 bg-bg-raised/30">
+            <span className="relative flex h-2 w-2">
+              <span className="animate-pulse-dot absolute inline-flex h-full w-full rounded-full bg-pitch-green opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-pitch-green" />
+            </span>
+            <span className="font-mono text-xs text-text-secondary hidden sm:inline">Live</span>
+          </div>
+          <span className="font-mono text-xs text-text-tertiary hidden lg:block">
+            {slot ? `#${slot.toLocaleString()}` : "---"}
+          </span>
         </div>
-        <span className="hidden md:block text-sm text-text-tertiary">
-          {slot ? `#${slot.toLocaleString()}` : "---"}
-        </span>
       </div>
     </header>
   );

@@ -41,9 +41,9 @@ function GateRow({ agent, delay }: { agent: GateAgent; delay: number }) {
 
   return (
     <div
-      className={`bg-bg-raised border ${borderStyle} rounded-lg p-6 transition-all duration-300 animate-fade-up opacity-0 ${
+      className={`bg-bg-raised/70 border ${borderStyle} rounded-xl p-6 transition-all duration-300 animate-fade-up opacity-0 ${
         state === "idle" ? "opacity-50" : ""
-      } hover:-translate-y-0.5 hover:brightness-110`}
+      } hover:-translate-y-0.5 hover:bg-bg-raised hover:shadow-[0_4px_24px_rgba(0,0,0,0.2)]`}
       style={{ animationDelay: `${delay}ms` }}
     >
       <div className="flex items-center justify-between gap-2 mb-3">
@@ -52,10 +52,10 @@ function GateRow({ agent, delay }: { agent: GateAgent; delay: number }) {
           <span className="font-mono text-xs text-text-tertiary animate-pulse">Inspecting...</span>
         )}
         {state === "executed" && (
-          <span className="font-mono text-xs text-pitch-green">EXECUTED</span>
+          <span className="font-mono text-xs text-pitch-green font-[500]">EXECUTED</span>
         )}
         {state === "blocked" && (
-          <span className="font-mono text-xs text-signal-red">BLOCKED</span>
+          <span className="font-mono text-xs text-signal-red font-[500]">BLOCKED</span>
         )}
       </div>
       <p className="text-sm text-text-primary">{agent.label}</p>

@@ -46,15 +46,17 @@ export default function Home() {
     <>
       <Hero />
 
-      <section className="py-14 border-t border-line-hairline">
+      {/* Network Health */}
+      <section className="py-16">
+        <div className="h-px bg-gradient-to-r from-transparent via-line-hairline to-transparent mb-16" />
         <h2 className="text-xs font-mono text-text-secondary uppercase tracking-[0.15em] mb-6">
           Network Health
         </h2>
-        <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-line-hairline rounded-lg overflow-hidden">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-px bg-line-hairline/50 rounded-xl overflow-hidden">
           {stats.map((s) => (
-            <div key={s.label} className="bg-bg-raised p-6">
+            <div key={s.label} className="bg-bg-raised/80 p-6">
               <p className="text-xs text-text-secondary uppercase tracking-wider mb-1.5">{s.label}</p>
-              <p className={`font-mono text-xl ${s.accent ? "text-pitch-green" : "text-text-primary"}`}>
+              <p className={`font-mono text-xl tabular-nums ${s.accent ? "text-pitch-green" : "text-text-primary"}`}>
                 {s.value}
               </p>
             </div>
@@ -62,19 +64,27 @@ export default function Home() {
         </div>
       </section>
 
-      <section className="py-14 border-t border-line-hairline">
+      {/* Matches */}
+      <section className="py-16">
+        <div className="h-px bg-gradient-to-r from-transparent via-line-hairline to-transparent mb-16" />
         <MatchGrid preview />
       </section>
 
-      <section className="py-14 border-t border-line-hairline">
+      {/* Gate Panel */}
+      <section className="py-16">
+        <div className="h-px bg-gradient-to-r from-transparent via-line-hairline to-transparent mb-16" />
         <GatePanel />
       </section>
 
-      <section className="py-14 border-t border-line-hairline">
+      {/* Proof Feed */}
+      <section className="py-16">
+        <div className="h-px bg-gradient-to-r from-transparent via-line-hairline to-transparent mb-16" />
         <ProofFeed />
       </section>
 
-      <section className="py-20 border-t border-line-hairline">
+      {/* CTA */}
+      <section className="py-24">
+        <div className="h-px bg-gradient-to-r from-transparent via-line-hairline to-transparent mb-24" />
         <div className="max-w-2xl mx-auto text-center">
           <h2 className="text-xs font-mono text-text-secondary uppercase tracking-[0.15em] mb-5">
             Built for Composability
@@ -87,14 +97,14 @@ export default function Home() {
           <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
             <Link
               href="/docs"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-bg-raised border border-line-hairline rounded-lg text-sm text-text-primary hover:border-pitch-green/30 hover:text-pitch-green transition-all no-underline"
+              className="inline-flex items-center gap-2.5 px-7 py-3 bg-bg-raised/80 border border-line-hairline rounded-xl text-sm text-text-primary hover:border-pitch-green/30 hover:text-pitch-green hover:shadow-[0_0_20px_rgba(57,255,106,0.05)] transition-all duration-200 no-underline"
             >
               <span>Read the Docs</span>
               <span className="font-mono text-xs">&rarr;</span>
             </Link>
             <Link
               href="/matches"
-              className="inline-flex items-center gap-2 px-6 py-3 bg-pitch-green/10 border border-pitch-green/20 rounded-lg text-sm text-pitch-green hover:bg-pitch-green/15 transition-all no-underline"
+              className="inline-flex items-center gap-2.5 px-7 py-3 bg-pitch-green/10 border border-pitch-green/20 rounded-xl text-sm text-pitch-green hover:bg-pitch-green/15 hover:shadow-[0_0_20px_rgba(57,255,106,0.08)] transition-all duration-200 no-underline"
             >
               <span>View Live Matches</span>
               <span className="font-mono text-xs">&rarr;</span>

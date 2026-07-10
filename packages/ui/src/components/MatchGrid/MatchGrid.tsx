@@ -42,22 +42,24 @@ export function MatchCard({ fixture, delay = 0 }: { fixture: Fixture; delay?: nu
   return (
     <Link
       href={`/matches/${fixture.id}`}
-      className={`block bg-bg-raised border ${t.border} rounded-lg p-6 no-underline transition-all duration-120 hover:-translate-y-0.5 hover:brightness-110 animate-fade-up opacity-0`}
+      className={`group block bg-bg-raised/70 border ${t.border} rounded-xl p-6 no-underline transition-all duration-200 hover:-translate-y-0.5 hover:bg-bg-raised hover:border-line-hairline hover:shadow-[0_4px_24px_rgba(0,0,0,0.2)] animate-fade-up opacity-0`}
       style={{ animationDelay: `${delay}ms` }}
     >
       <div className="flex items-center justify-between gap-3 mb-4">
-        <span className="text-sm font-[500] text-text-primary truncate">{fixture.homeTeam}</span>
+        <span className="text-sm font-[500] text-text-primary truncate group-hover:text-white transition-colors">{fixture.homeTeam}</span>
         <span className="shrink-0 text-xs text-text-tertiary font-mono">vs</span>
-        <span className="text-sm font-[500] text-text-primary truncate text-right">{fixture.awayTeam}</span>
+        <span className="text-sm font-[500] text-text-primary truncate text-right group-hover:text-white transition-colors">{fixture.awayTeam}</span>
       </div>
       <div className="flex items-center justify-between">
         <span className={`inline-flex items-center gap-1.5 text-xs font-mono ${t.text}`}>
           <span className={`inline-block w-1.5 h-1.5 rounded-full ${t.dot}`} />
           {t.label}
         </span>
-        <span className="font-mono text-sm text-text-primary">{fixture.margin.toFixed(1)}%</span>
+        <span className="font-mono text-sm text-text-primary tabular-nums">{fixture.margin.toFixed(1)}%</span>
       </div>
-      <p className="font-mono text-xs text-text-tertiary mt-3">Checked {fixture.lastChecked}</p>
+      <div className="mt-4 pt-3 border-t border-line-hairline/30">
+        <p className="font-mono text-xs text-text-tertiary">Checked {fixture.lastChecked}</p>
+      </div>
     </Link>
   );
 }

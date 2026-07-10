@@ -26,10 +26,14 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     <html lang="en" className={`${fraunces.variable} ${martianMono.variable}`}>
       <body>
         <Background />
-        <div className="relative z-10 mx-auto max-w-[1440px] px-6 lg:px-12 min-h-screen flex flex-col">
+        <div className="relative z-10 min-h-screen flex flex-col">
           <Nav />
-          <main className="flex-1">{children}</main>
-          <Footer />
+          <main className="flex-1 mx-auto w-full max-w-[1440px] px-6 lg:px-12">
+            {children}
+          </main>
+          <div className="mx-auto w-full max-w-[1440px] px-6 lg:px-12">
+            <Footer />
+          </div>
         </div>
       </body>
     </html>

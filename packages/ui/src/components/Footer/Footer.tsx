@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useState } from "react";
 
 export function Footer() {
@@ -13,22 +14,28 @@ export function Footer() {
   }, []);
 
   return (
-    <footer className="mt-auto border-t border-line-hairline">
-      <div className="py-14">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
-          <div>
-            <h3 className="text-lg font-[500] tracking-tight text-text-primary mb-3">
-              Odds<span className="text-pitch-green">Trust</span>
-            </h3>
-            <p className="text-sm text-text-secondary leading-relaxed">
-              Autonomous on-chain trust oracle for sports betting odds verification.
-              Powered by Solana.
+    <footer className="relative mt-auto">
+      {/* Gradient divider */}
+      <div className="h-px bg-gradient-to-r from-transparent via-line-hairline to-transparent" />
+
+      <div className="py-16">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-12 gap-12 lg:gap-8 mb-14">
+          {/* Brand column */}
+          <div className="lg:col-span-4">
+            <Link href="/" className="inline-flex items-center gap-0.5 text-xl font-[600] tracking-tight text-text-primary no-underline mb-4">
+              <span>Odds</span>
+              <span className="text-pitch-green">Trust</span>
+            </Link>
+            <p className="text-sm text-text-secondary leading-relaxed max-w-xs">
+              Autonomous on-chain trust oracle for sports betting odds verification. 
+              Detects anomalies, computes arbitrage, and publishes proofs to Solana.
             </p>
           </div>
 
-          <div>
-            <h4 className="font-mono text-xs text-text-primary uppercase tracking-wider mb-4">Platform</h4>
-            <ul className="space-y-2.5">
+          {/* Platform */}
+          <div className="lg:col-span-2">
+            <h4 className="text-sm font-[500] text-text-primary mb-4">Platform</h4>
+            <ul className="space-y-3">
               {[
                 { label: "Dashboard", href: "/" },
                 { label: "Live Matches", href: "/matches" },
@@ -36,7 +43,10 @@ export function Footer() {
                 { label: "Oracle", href: "/oracle" },
               ].map((l) => (
                 <li key={l.href}>
-                  <a href={l.href} className="text-sm text-text-secondary hover:text-text-primary transition-colors no-underline">
+                  <a
+                    href={l.href}
+                    className="text-sm text-text-secondary hover:text-text-primary transition-colors duration-200 no-underline"
+                  >
                     {l.label}
                   </a>
                 </li>
@@ -44,9 +54,10 @@ export function Footer() {
             </ul>
           </div>
 
-          <div>
-            <h4 className="font-mono text-xs text-text-primary uppercase tracking-wider mb-4">Developers</h4>
-            <ul className="space-y-2.5">
+          {/* Developers */}
+          <div className="lg:col-span-3">
+            <h4 className="text-sm font-[500] text-text-primary mb-4">Developers</h4>
+            <ul className="space-y-3">
               {[
                 { label: "Documentation", href: "/docs" },
                 { label: "API Reference", href: "/docs#api" },
@@ -54,7 +65,10 @@ export function Footer() {
                 { label: "On-Chain Program", href: "/docs#program" },
               ].map((l) => (
                 <li key={l.href}>
-                  <a href={l.href} className="text-sm text-text-secondary hover:text-text-primary transition-colors no-underline">
+                  <a
+                    href={l.href}
+                    className="text-sm text-text-secondary hover:text-text-primary transition-colors duration-200 no-underline"
+                  >
                     {l.label}
                   </a>
                 </li>
@@ -62,36 +76,47 @@ export function Footer() {
             </ul>
           </div>
 
-          <div>
-            <h4 className="font-mono text-xs text-text-primary uppercase tracking-wider mb-4">Network Status</h4>
-            <div className="space-y-2.5">
+          {/* Network Status */}
+          <div className="lg:col-span-3">
+            <h4 className="text-sm font-[500] text-text-primary mb-4">Network Status</h4>
+            <div className="space-y-3">
               <div className="flex items-center gap-2.5">
-                <span className="inline-block w-2 h-2 rounded-full bg-pitch-green animate-pulse-dot" />
+                <span className="relative flex h-2 w-2 shrink-0">
+                  <span className="animate-pulse-dot absolute inline-flex h-full w-full rounded-full bg-pitch-green opacity-75" />
+                  <span className="relative inline-flex rounded-full h-2 w-2 bg-pitch-green" />
+                </span>
                 <span className="text-sm text-text-secondary">Oracle Active</span>
               </div>
               <div className="flex items-center gap-2.5">
+                <span className="w-2 h-2 shrink-0" />
                 <span className="font-mono text-sm text-text-secondary">Solana Devnet</span>
               </div>
               {slot && (
                 <div className="flex items-center gap-2.5">
-                  <span className="font-mono text-sm text-text-secondary">Slot #{slot.toLocaleString()}</span>
+                  <span className="w-2 h-2 shrink-0" />
+                  <span className="font-mono text-sm text-text-secondary">
+                    Slot #{slot.toLocaleString()}
+                  </span>
                 </div>
               )}
             </div>
           </div>
         </div>
 
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3 pt-7 border-t border-line-hairline/50">
-          <div className="flex items-center gap-3">
-            <span className="font-mono text-xs text-text-tertiary">
-              &copy; {new Date().getFullYear()} OddsTrust
+        {/* Bottom bar */}
+        <div className="pt-7 border-t border-line-hairline/50">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-4 text-xs text-text-tertiary">
+              <span>&copy; {new Date().getFullYear()} OddsTrust</span>
+              <span className="h-3 w-px bg-line-hairline/60" />
+              <span>On-Chain Trust Oracle</span>
+              <span className="h-3 w-px bg-line-hairline/60" />
+              <span>Solana Devnet</span>
+            </div>
+            <span className="font-mono text-[10px] uppercase tracking-widest text-text-tertiary/50">
+              Not financial advice
             </span>
-            <span className="h-3.5 w-px bg-line-hairline" />
-            <span className="font-mono text-xs text-text-tertiary">On-Chain Trust Oracle</span>
           </div>
-          <span className="font-mono text-xs text-text-tertiary opacity-40">
-            NOT FINANCIAL ADVICE &middot; FOR DEMONSTRATION PURPOSES ONLY
-          </span>
         </div>
       </div>
     </footer>
