@@ -67,12 +67,12 @@ export default function MatchesPage() {
   }), [matches]);
 
   return (
-    <section className="py-12">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+    <section className="py-14">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-8">
         <div>
-          <p className="font-mono text-[11px] text-pitch-green uppercase tracking-wider mb-1">Matches</p>
-          <h1 className="text-2xl font-[500] mb-1">Live Match Grid</h1>
-          <p className="text-xs text-text-tertiary">{matches.length} fixtures tracked</p>
+          <p className="font-mono text-xs text-pitch-green uppercase tracking-wider mb-2">Matches</p>
+          <h1 className="text-3xl md:text-4xl font-[500] mb-2">Live Match Grid</h1>
+          <p className="text-sm text-text-secondary">{matches.length} fixtures tracked</p>
         </div>
         <div className="flex items-center gap-3">
           <input
@@ -80,14 +80,14 @@ export default function MatchesPage() {
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             placeholder="Search teams..."
-            className="w-40 bg-bg-raised border border-line-hairline rounded-lg px-3 py-1.5 text-[11px] font-mono text-text-primary placeholder:text-text-tertiary outline-none focus:border-pitch-green/30 transition-colors"
+            className="w-44 bg-bg-raised border border-line-hairline rounded-lg px-3 py-2 text-sm font-mono text-text-primary placeholder:text-text-tertiary outline-none focus:border-pitch-green/30 transition-colors"
           />
           <div className="flex rounded border border-line-hairline overflow-hidden">
             {(["all", "consistent", "flagged", "blocked"] as Filter[]).map((f) => (
               <button
                 key={f}
                 onClick={() => setFilter(f)}
-                className={`px-3 py-1.5 text-[11px] uppercase tracking-wider transition-colors ${
+                className={`px-3 py-2 text-xs uppercase tracking-wider transition-colors ${
                   filter === f ? "bg-bg-raised text-text-primary" : "bg-transparent text-text-tertiary hover:text-text-secondary"
                 }`}
               >
@@ -98,7 +98,7 @@ export default function MatchesPage() {
           <select
             value={sort}
             onChange={(e) => setSort(e.target.value as Sort)}
-            className="rounded border border-line-hairline bg-bg-raised px-3 py-1.5 text-[11px] font-mono uppercase tracking-wider text-text-tertiary outline-none hover:text-text-secondary transition-colors"
+            className="rounded border border-line-hairline bg-bg-raised px-3 py-2 text-xs font-mono uppercase tracking-wider text-text-tertiary outline-none hover:text-text-secondary transition-colors"
           >
             <option value="margin">By Margin</option>
             <option value="recent">By Recent</option>
@@ -141,13 +141,13 @@ export default function MatchesPage() {
       </div>
 
       {!loading && list.length === 0 && (
-        <p className="py-16 text-center text-sm text-text-tertiary">
+        <p className="py-16 text-center text-sm text-text-secondary">
           {search ? `No matches matching "${search}"` : `No ${filter !== "all" ? filter : ""} matches found.`}
         </p>
       )}
 
-      <div className="mt-8">
-        <Link href="/" className="font-mono text-xs text-text-secondary hover:text-text-primary transition-colors no-underline">
+      <div className="mt-10">
+        <Link href="/" className="font-mono text-sm text-text-secondary hover:text-text-primary transition-colors no-underline">
           &larr; Back to home
         </Link>
       </div>

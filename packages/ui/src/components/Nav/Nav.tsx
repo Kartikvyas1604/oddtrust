@@ -28,15 +28,15 @@ export function Nav() {
   }, [error]);
 
   return (
-    <header className="relative flex items-center justify-between py-4 border-b border-line-hairline animate-fade-up opacity-0">
+    <header className="relative flex items-center justify-between py-5 border-b border-line-hairline animate-fade-up opacity-0">
       <Link
         href="/"
-        className="text-lg font-[500] tracking-tight text-text-primary hover:text-pitch-green transition-colors no-underline"
+        className="text-xl font-[500] tracking-tight text-text-primary hover:text-pitch-green transition-colors no-underline"
       >
         Odds<span className="text-pitch-green">Trust</span>
       </Link>
 
-      <nav className="absolute left-1/2 -translate-x-1/2 flex items-center gap-6">
+      <nav className="absolute left-1/2 -translate-x-1/2 flex items-center gap-7">
         {links.map((l) => {
           const active = l.href === "/matches" ? pathname.startsWith("/matches") : pathname === l.href;
           return (
@@ -56,12 +56,12 @@ export function Nav() {
       </nav>
 
       <div className="flex items-center gap-4 font-mono">
-        <div className="flex items-center gap-1.5 text-xs text-pitch-green">
-          <span className="inline-block w-1.5 h-1.5 rounded-full bg-pitch-green animate-pulse-dot" />
+        <div className="flex items-center gap-2 text-sm text-pitch-green">
+          <span className="inline-block w-2 h-2 rounded-full bg-pitch-green animate-pulse-dot" />
           <span className="hidden sm:inline">Oracle Active</span>
           <span className="sm:hidden">Live</span>
         </div>
-        <span className="hidden md:block text-xs text-text-tertiary">
+        <span className="hidden md:block text-sm text-text-tertiary">
           {slot ? `#${slot.toLocaleString()}` : "---"}
         </span>
       </div>

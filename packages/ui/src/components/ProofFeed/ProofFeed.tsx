@@ -123,19 +123,19 @@ export function ProofFeed() {
     <section>
       <div className="flex items-center justify-between mb-4">
         <h2 className="text-xs font-mono text-text-secondary uppercase tracking-[0.15em]">Proof Feed</h2>
-        <span className="font-mono text-[10px] text-text-tertiary">{entries.length} {entries.length === 1 ? "proof" : "proofs"}</span>
+        <span className="font-mono text-xs text-text-tertiary">{entries.length} {entries.length === 1 ? "proof" : "proofs"}</span>
       </div>
       <div className="bg-bg-panel border border-line-hairline rounded-lg overflow-hidden">
-        <div className="flex items-center gap-3 px-4 py-2 border-b border-line-hairline bg-bg-void/50">
-          <span className="font-mono text-[10px] text-text-tertiary w-[70px] shrink-0">Slot</span>
-          <span className="font-mono text-[10px] text-text-tertiary flex-1">Fixture</span>
-          <span className="font-mono text-[10px] text-text-tertiary w-[60px] text-right shrink-0">Margin</span>
-          <span className="font-mono text-[10px] text-text-tertiary w-[80px] text-right shrink-0">Time</span>
-          <span className="font-mono text-[10px] text-text-tertiary w-[80px] text-right shrink-0">Status</span>
+        <div className="flex items-center gap-4 px-5 py-2.5 border-b border-line-hairline bg-bg-void/50">
+          <span className="font-mono text-xs text-text-tertiary w-[70px] shrink-0">Slot</span>
+          <span className="font-mono text-xs text-text-tertiary flex-1">Fixture</span>
+          <span className="font-mono text-xs text-text-tertiary w-[70px] text-right shrink-0">Margin</span>
+          <span className="font-mono text-xs text-text-tertiary w-[80px] text-right shrink-0">Time</span>
+          <span className="font-mono text-xs text-text-tertiary w-[90px] text-right shrink-0">Status</span>
         </div>
-        <div className="divide-y divide-line-hairline/50 max-h-[340px] overflow-y-auto">
+        <div className="divide-y divide-line-hairline/50 max-h-[400px] overflow-y-auto">
           {displayEntries.length === 0 && (
-            <div className="px-4 py-6 text-center font-mono text-xs text-text-tertiary">
+            <div className="px-5 py-8 text-center font-mono text-sm text-text-tertiary">
               {loading ? "Loading..." : "No proof entries yet."}
             </div>
           )}
@@ -143,18 +143,18 @@ export function ProofFeed() {
             const status = mapAction(e.action);
             const s = cfg[e.action] ?? cfg.CHECK_PASSED;
             return (
-              <div key={e.id} className={`flex items-center gap-3 px-4 py-2 ${i === 0 && i >= 5 ? "animate-feed-in" : ""}`}>
-                <span className="font-mono text-xs text-text-tertiary w-[70px] shrink-0">
+              <div key={e.id} className={`flex items-center gap-4 px-5 py-3 ${i === 0 && i >= 5 ? "animate-feed-in" : ""}`}>
+                <span className="font-mono text-sm text-text-tertiary w-[70px] shrink-0">
                   {e.slot ? `#${e.slot}` : "---"}
                 </span>
-                <span className="text-xs text-text-primary flex-1 truncate">{e.fixtureId}</span>
-                <span className="font-mono text-xs text-text-primary w-[60px] text-right shrink-0">
+                <span className="text-sm text-text-primary flex-1 truncate">{e.fixtureId}</span>
+                <span className="font-mono text-sm text-text-primary w-[70px] text-right shrink-0">
                   {e.margin !== null ? `${(e.margin * 100).toFixed(1)}%` : "---"}
                 </span>
-                <span className="font-mono text-xs text-text-tertiary w-[80px] text-right shrink-0">
+                <span className="font-mono text-sm text-text-tertiary w-[80px] text-right shrink-0">
                   {new Date(e.loggedAt).toLocaleTimeString("en-US", { hour12: false })}
                 </span>
-                <span className={`font-mono text-xs ${s.cls} w-[80px] text-right shrink-0`}>{s.label}</span>
+                <span className={`font-mono text-sm ${s.cls} w-[90px] text-right shrink-0`}>{s.label}</span>
               </div>
             );
           })}
@@ -162,7 +162,7 @@ export function ProofFeed() {
         {hasMore && (
           <button
             onClick={loadMore}
-            className="w-full px-4 py-2 font-mono text-xs text-text-secondary hover:text-text-primary bg-bg-raised hover:bg-bg-panel transition-colors border-t border-line-hairline"
+            className="w-full px-5 py-2.5 font-mono text-sm text-text-secondary hover:text-text-primary bg-bg-raised hover:bg-bg-panel transition-colors border-t border-line-hairline"
           >
             Load more
           </button>

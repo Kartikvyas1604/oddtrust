@@ -46,26 +46,26 @@ function GateRow({ agent, delay }: { agent: GateAgent; delay: number }) {
       } hover:-translate-y-0.5 hover:brightness-110`}
       style={{ animationDelay: `${delay}ms` }}
     >
-      <div className="flex items-center justify-between gap-2 mb-2">
-        <span className="font-mono text-xs text-text-primary font-[500]">{agent.id}</span>
+      <div className="flex items-center justify-between gap-2 mb-3">
+        <span className="font-mono text-sm text-text-primary font-[500]">{agent.id}</span>
         {state === "inspecting" && (
-          <span className="font-mono text-[10px] text-text-tertiary animate-pulse">Inspecting...</span>
+          <span className="font-mono text-xs text-text-tertiary animate-pulse">Inspecting...</span>
         )}
         {state === "executed" && (
-          <span className="font-mono text-[10px] text-pitch-green">EXECUTED</span>
+          <span className="font-mono text-xs text-pitch-green">EXECUTED</span>
         )}
         {state === "blocked" && (
-          <span className="font-mono text-[10px] text-signal-red">BLOCKED</span>
+          <span className="font-mono text-xs text-signal-red">BLOCKED</span>
         )}
       </div>
-      <p className="text-xs text-text-primary">{agent.label}</p>
+      <p className="text-sm text-text-primary">{agent.label}</p>
       {state === "blocked" && (
-        <p className="font-mono text-[10px] text-signal-red/70 mt-2 leading-tight">
+        <p className="font-mono text-xs text-signal-red/70 mt-2 leading-tight">
           Cause: {agent.inspectFixture} flagged
         </p>
       )}
       {state === "idle" && (
-        <p className="font-mono text-[10px] text-text-tertiary/50 mt-2">Awaiting check...</p>
+        <p className="font-mono text-xs text-text-tertiary/50 mt-2">Awaiting check...</p>
       )}
     </div>
   );
@@ -91,7 +91,7 @@ export function GatePanel() {
       <h2 className="text-xs font-mono text-text-secondary uppercase tracking-[0.15em] mb-4">
         Composability Gate
       </h2>
-      <p className="text-xs text-text-tertiary leading-relaxed max-w-lg mb-6">
+      <p className="text-sm text-text-secondary leading-relaxed max-w-lg mb-6">
         External agents audit trust data before execution. Each gate independently resolves a transaction based on live oracle state.
       </p>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">

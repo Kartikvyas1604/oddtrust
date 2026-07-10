@@ -45,41 +45,41 @@ export function Hero() {
   }, []);
 
   return (
-    <section className="relative py-16 text-center animate-fade-up opacity-0">
-      <p className="text-xs font-mono text-text-secondary uppercase tracking-[0.15em] mb-3">
+    <section className="relative py-20 text-center animate-fade-up opacity-0">
+      <p className="text-sm font-mono text-text-secondary uppercase tracking-[0.15em] mb-4">
         Tournament Trust Score
       </p>
       <h1 className="text-7xl md:text-9xl font-[500] tracking-tight leading-none text-trophy-gold">
         <CountUp end={stats?.trustScore ?? 0} duration={800} suffix="%" />
       </h1>
 
-      <div className="mt-12 flex justify-center gap-4">
-        <div className="bg-bg-raised border border-line-hairline rounded-lg p-5 min-w-[160px] flex-1 max-w-[220px] text-center">
-          <div className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-bg-void mb-3">
-            <span className="inline-block w-2 h-2 rounded-full bg-text-tertiary" />
+      <div className="mt-14 flex justify-center gap-5">
+        <div className="bg-bg-raised border border-line-hairline rounded-lg p-6 min-w-[180px] flex-1 max-w-[240px] text-center">
+          <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-bg-void mb-3">
+            <span className="inline-block w-2.5 h-2.5 rounded-full bg-text-tertiary" />
           </div>
-          <p className="font-mono text-2xl text-text-primary mb-0.5">
+          <p className="font-mono text-3xl text-text-primary mb-1">
             <CountUp end={stats?.fixturesTracked ?? 0} duration={800} />
           </p>
-          <p className="text-[11px] text-text-secondary uppercase tracking-wider">Matches Audited</p>
+          <p className="text-xs text-text-secondary uppercase tracking-wider">Matches Audited</p>
         </div>
-        <div className="bg-bg-raised border border-line-hairline rounded-lg p-5 min-w-[160px] flex-1 max-w-[220px] text-center">
-          <div className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-bg-void mb-3">
-            <span className="inline-block w-2 h-2 rounded-full bg-pitch-green" />
+        <div className="bg-bg-raised border border-line-hairline rounded-lg p-6 min-w-[180px] flex-1 max-w-[240px] text-center">
+          <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-bg-void mb-3">
+            <span className="inline-block w-2.5 h-2.5 rounded-full bg-pitch-green" />
           </div>
-          <p className="font-mono text-2xl text-pitch-green mb-0.5">
+          <p className="font-mono text-3xl text-pitch-green mb-1">
             <CountUp end={stats?.totalChecks ?? 0} duration={800} />
           </p>
-          <p className="text-[11px] text-text-secondary uppercase tracking-wider">Consistency Checks</p>
+          <p className="text-xs text-text-secondary uppercase tracking-wider">Consistency Checks</p>
         </div>
-        <div className="bg-bg-raised border border-line-hairline rounded-lg p-5 min-w-[160px] flex-1 max-w-[220px] text-center">
-          <div className="inline-flex items-center justify-center w-6 h-6 rounded-full bg-bg-void mb-3">
-            <span className="inline-block w-2 h-2 rounded-full bg-signal-amber" />
+        <div className="bg-bg-raised border border-line-hairline rounded-lg p-6 min-w-[180px] flex-1 max-w-[240px] text-center">
+          <div className="inline-flex items-center justify-center w-8 h-8 rounded-full bg-bg-void mb-3">
+            <span className="inline-block w-2.5 h-2.5 rounded-full bg-signal-amber" />
           </div>
-          <p className="font-mono text-2xl text-signal-amber mb-0.5">
+          <p className="font-mono text-3xl text-signal-amber mb-1">
             <CountUp end={stats?.flaggedMarkets ?? 0} duration={800} />
           </p>
-          <p className="text-[11px] text-text-secondary uppercase tracking-wider">Inconsistencies Found</p>
+          <p className="text-xs text-text-secondary uppercase tracking-wider">Inconsistencies Found</p>
         </div>
       </div>
 

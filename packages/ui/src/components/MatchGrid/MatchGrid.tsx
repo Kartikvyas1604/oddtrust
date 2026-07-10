@@ -45,7 +45,7 @@ export function MatchCard({ fixture, delay = 0 }: { fixture: Fixture; delay?: nu
       className={`block bg-bg-raised border ${t.border} rounded-lg p-6 no-underline transition-all duration-120 hover:-translate-y-0.5 hover:brightness-110 animate-fade-up opacity-0`}
       style={{ animationDelay: `${delay}ms` }}
     >
-      <div className="flex items-center justify-between gap-3 mb-3">
+      <div className="flex items-center justify-between gap-3 mb-4">
         <span className="text-sm font-[500] text-text-primary truncate">{fixture.homeTeam}</span>
         <span className="shrink-0 text-xs text-text-tertiary font-mono">vs</span>
         <span className="text-sm font-[500] text-text-primary truncate text-right">{fixture.awayTeam}</span>
@@ -55,9 +55,9 @@ export function MatchCard({ fixture, delay = 0 }: { fixture: Fixture; delay?: nu
           <span className={`inline-block w-1.5 h-1.5 rounded-full ${t.dot}`} />
           {t.label}
         </span>
-        <span className="font-mono text-xs text-text-primary">{fixture.margin.toFixed(1)}%</span>
+        <span className="font-mono text-sm text-text-primary">{fixture.margin.toFixed(1)}%</span>
       </div>
-      <p className="font-mono text-[10px] text-text-tertiary mt-3">Checked {fixture.lastChecked}</p>
+      <p className="font-mono text-xs text-text-tertiary mt-3">Checked {fixture.lastChecked}</p>
     </Link>
   );
 }
@@ -97,7 +97,7 @@ export function MatchGrid({ preview }: { preview?: boolean }) {
 
   return (
     <section>
-      <div className="flex items-center justify-between mb-5">
+      <div className="flex items-center justify-between mb-6">
         <h2 className="text-xs font-mono text-text-secondary uppercase tracking-[0.15em]">
           Live Match Trust Analysis
         </h2>
@@ -119,7 +119,7 @@ export function MatchGrid({ preview }: { preview?: boolean }) {
           <MatchCard key={f.id} fixture={f} delay={700 + i * 80} />
         ))}
         {!loading && items.length === 0 && (
-          <p className="col-span-full text-center font-mono text-xs text-text-tertiary py-8">
+          <p className="col-span-full text-center font-mono text-sm text-text-tertiary py-8">
             No matches tracked yet.
           </p>
         )}

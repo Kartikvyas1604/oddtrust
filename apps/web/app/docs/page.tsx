@@ -44,10 +44,10 @@ const architecture = [
 
 export default function DocsPage() {
   return (
-    <section className="py-12">
-      <div className="max-w-3xl mb-10">
-        <p className="font-mono text-[11px] text-pitch-green uppercase tracking-wider mb-2">Documentation</p>
-        <h1 className="text-2xl sm:text-3xl font-[500] mb-4">How OddsTrust Works</h1>
+    <section className="py-14">
+      <div className="max-w-3xl mb-12">
+        <p className="font-mono text-xs text-pitch-green uppercase tracking-wider mb-3">Documentation</p>
+        <h1 className="text-3xl md:text-4xl font-[500] mb-5">How OddsTrust Works</h1>
         <p className="text-sm text-text-secondary leading-relaxed">
           OddsTrust is an autonomous on-chain trust oracle that verifies the consistency of sports
           betting odds across multiple markets. It uses the &Sigma;(1/odds) formula to detect anomalies,
@@ -56,15 +56,15 @@ export default function DocsPage() {
       </div>
 
       {/* Architecture Pipeline */}
-      <div className="mb-12">
+      <div className="mb-14">
         <h2 className="text-xs font-mono text-text-secondary uppercase tracking-[0.15em] mb-6" id="architecture">Architecture Pipeline</h2>
         <div className="space-y-3">
           {architecture.map((item) => (
-            <div key={item.step} className="flex gap-4 p-5 bg-bg-raised border border-line-hairline rounded-lg">
+            <div key={item.step} className="flex gap-5 p-5 bg-bg-raised border border-line-hairline rounded-lg">
               <span className={`font-mono text-sm shrink-0 font-[500] ${item.color}`}>{item.step}</span>
               <div>
-                <p className="text-sm text-text-primary font-[500] mb-1">{item.title}</p>
-                <p className="text-xs text-text-secondary leading-relaxed">{item.desc}</p>
+                <p className="text-sm text-text-primary font-[500] mb-1.5">{item.title}</p>
+                <p className="text-sm text-text-secondary leading-relaxed">{item.desc}</p>
               </div>
             </div>
           ))}
@@ -72,16 +72,16 @@ export default function DocsPage() {
       </div>
 
       {/* Consistency Formula */}
-      <div className="grid lg:grid-cols-2 gap-6 mb-12" id="formula">
+      <div className="grid lg:grid-cols-2 gap-6 mb-14" id="formula">
         <div className="bg-bg-raised border border-line-hairline rounded-lg p-6">
-          <h2 className="text-xs text-text-secondary uppercase tracking-[0.12em] mb-4">The Consistency Formula</h2>
-          <div className="space-y-4 text-xs leading-relaxed text-text-secondary">
+          <h2 className="text-xs font-mono text-text-secondary uppercase tracking-[0.12em] mb-5">The Consistency Formula</h2>
+          <div className="space-y-4 text-sm leading-relaxed text-text-secondary">
             <p>For any given market, OddsTrust computes the <strong>implied probability</strong> of each outcome as the reciprocal of its decimal odds:</p>
-            <div className="font-mono text-sm text-text-primary bg-bg-void border border-line-hairline rounded p-3 text-center">
+            <div className="font-mono text-sm text-text-primary bg-bg-void border border-line-hairline rounded p-3.5 text-center">
               P(outcome) = 1 / odds<sub>outcome</sub>
             </div>
             <p>In an efficient market, the sum of implied probabilities across all mutually exclusive outcomes should equal 1.0 (100%):</p>
-            <div className="font-mono text-sm text-text-primary bg-bg-void border border-line-hairline rounded p-3 text-center">
+            <div className="font-mono text-sm text-text-primary bg-bg-void border border-line-hairline rounded p-3.5 text-center">
               &Sigma;(1/odds<sub>i</sub>) = 1.0
             </div>
             <p>In practice, bookmakers build in a margin. OddsTrust flags any fixture where the total implied probability exceeds <strong>1.05 (105%)</strong>, indicating potential inconsistency or manipulation.</p>
@@ -89,11 +89,11 @@ export default function DocsPage() {
         </div>
 
         <div className="bg-bg-raised border border-line-hairline rounded-lg p-6">
-          <h2 className="text-xs text-text-secondary uppercase tracking-[0.12em] mb-4">Worked Example</h2>
-          <div className="space-y-3 text-xs leading-relaxed text-text-secondary">
+          <h2 className="text-xs font-mono text-text-secondary uppercase tracking-[0.12em] mb-5">Worked Example</h2>
+          <div className="space-y-3 text-sm leading-relaxed text-text-secondary">
             <p>Consider a Match Winner market for Brazil vs Argentina:</p>
             <div className="overflow-x-auto">
-              <table className="w-full text-left font-mono text-[12px]">
+              <table className="w-full text-left font-mono text-xs">
                 <thead>
                   <tr className="border-b border-line-hairline">
                     <th className="py-2 pr-4 text-text-tertiary">Outcome</th>
@@ -132,7 +132,7 @@ export default function DocsPage() {
       </div>
 
       {/* Supported Markets */}
-      <div className="mb-12">
+      <div className="mb-14">
         <h2 className="text-xs font-mono text-text-secondary uppercase tracking-[0.15em] mb-6" id="markets">Supported Markets</h2>
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
           {[
@@ -149,8 +149,8 @@ export default function DocsPage() {
             <div key={m.name} className="bg-bg-raised border border-line-hairline rounded-lg p-4 flex items-start gap-3">
               <span className="font-mono text-[10px] text-pitch-green bg-pitch-green/10 border border-pitch-green/20 rounded px-1.5 py-0.5 shrink-0">{m.icon}</span>
               <div>
-                <p className="text-xs text-text-primary font-[500]">{m.name}</p>
-                <p className="font-mono text-[10px] text-text-tertiary mt-0.5">{m.outcomes}</p>
+                <p className="text-sm text-text-primary font-[500]">{m.name}</p>
+                <p className="font-mono text-xs text-text-tertiary mt-0.5">{m.outcomes}</p>
               </div>
             </div>
           ))}
@@ -158,19 +158,19 @@ export default function DocsPage() {
       </div>
 
       {/* API Endpoints */}
-      <div className="mb-12" id="api">
+      <div className="mb-14" id="api">
         <h2 className="text-xs font-mono text-text-secondary uppercase tracking-[0.15em] mb-6">API Endpoints</h2>
         <div className="bg-bg-raised border border-line-hairline rounded-lg overflow-hidden">
           <div className="divide-y divide-line-hairline/50">
             {endpoints.map((ep) => (
               <div key={ep.name} className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 p-4">
                 <div className="shrink-0 w-28">
-                  <span className="text-xs text-text-primary font-[500]">{ep.name}</span>
+                  <span className="text-sm text-text-primary font-[500]">{ep.name}</span>
                 </div>
                 <div className="shrink-0 sm:w-52">
-                  <span className="font-mono text-[11px] text-pitch-green">{ep.url}</span>
+                  <span className="font-mono text-xs text-pitch-green">{ep.url}</span>
                 </div>
-                <p className="text-[11px] text-text-tertiary leading-relaxed">{ep.desc}</p>
+                <p className="text-sm text-text-secondary leading-relaxed">{ep.desc}</p>
               </div>
             ))}
           </div>
@@ -178,25 +178,25 @@ export default function DocsPage() {
       </div>
 
       {/* On-Chain Program */}
-      <div className="bg-bg-raised border border-line-hairline rounded-lg p-6 max-w-2xl mb-12" id="program">
-        <h2 className="text-xs text-text-secondary uppercase tracking-[0.12em] mb-4">On-Chain Program</h2>
-        <div className="space-y-3 text-xs leading-relaxed text-text-secondary">
+      <div className="bg-bg-raised border border-line-hairline rounded-lg p-6 max-w-2xl mb-14" id="program">
+        <h2 className="text-xs font-mono text-text-secondary uppercase tracking-[0.12em] mb-5">On-Chain Program</h2>
+        <div className="space-y-3 text-sm leading-relaxed text-text-secondary">
           <p>Consistency proofs are committed to Solana via an Anchor program. Each check generates a SHA-256 hash stored on-chain and independently verifiable.</p>
-          <div className="font-mono text-sm text-text-primary bg-bg-void border border-line-hairline rounded p-3">
+          <div className="font-mono text-sm text-text-primary bg-bg-void border border-line-hairline rounded p-3.5">
             <span className="text-text-tertiary">Program ID: </span>HooVY5etEhNnPWouvZhzGCgbTjBfk3mff66S8jFgaAit
           </div>
           <p>The program supports four instructions:</p>
           <ul className="space-y-1.5 ml-4">
-            <li className="font-mono text-[11px] text-text-secondary">
+            <li className="font-mono text-xs text-text-secondary">
               <span className="text-pitch-green">initialize_config</span> &mdash; Set up oracle authority and thresholds
             </li>
-            <li className="font-mono text-[11px] text-text-secondary">
+            <li className="font-mono text-xs text-text-secondary">
               <span className="text-pitch-green">submit_check</span> &mdash; Submit a consistency check result
             </li>
-            <li className="font-mono text-[11px] text-text-secondary">
+            <li className="font-mono text-xs text-text-secondary">
               <span className="text-pitch-green">query_trust</span> &mdash; Read trust status for a fixture
             </li>
-            <li className="font-mono text-[11px] text-text-secondary">
+            <li className="font-mono text-xs text-text-secondary">
               <span className="text-pitch-green">trading_agent_check</span> &mdash; Gate an agent action based on oracle state
             </li>
           </ul>
@@ -204,12 +204,12 @@ export default function DocsPage() {
       </div>
 
       {/* Quick Start */}
-      <div className="mb-12" id="quickstart">
+      <div className="mb-14" id="quickstart">
         <h2 className="text-xs font-mono text-text-secondary uppercase tracking-[0.15em] mb-6">Quick Start</h2>
         <div className="bg-bg-raised border border-line-hairline rounded-lg p-6">
-          <div className="space-y-4 text-xs leading-relaxed text-text-secondary">
+          <div className="space-y-4 text-sm leading-relaxed text-text-secondary">
             <p>Get OddsTrust running locally in three steps:</p>
-            <div className="font-mono text-[12px] bg-bg-void border border-line-hairline rounded p-4 space-y-2">
+            <div className="font-mono text-xs bg-bg-void border border-line-hairline rounded p-4 space-y-2">
               <p className="text-text-tertiary"># 1. Install dependencies</p>
               <p className="text-text-primary">pnpm install</p>
               <p className="text-text-tertiary mt-3"># 2. Configure environment</p>
@@ -223,8 +223,8 @@ export default function DocsPage() {
         </div>
       </div>
 
-      <div className="mt-8">
-        <Link href="/" className="font-mono text-xs text-text-secondary hover:text-text-primary transition-colors no-underline">
+      <div className="mt-10">
+        <Link href="/" className="font-mono text-sm text-text-secondary hover:text-text-primary transition-colors no-underline">
           &larr; Back to home
         </Link>
       </div>
