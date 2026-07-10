@@ -48,7 +48,7 @@ export function Nav() {
           Odds<span className="text-pitch-green">Trust</span>
         </Link>
 
-        <nav className="hidden md:flex items-center gap-8">
+        <nav className="hidden md:flex items-center gap-6">
           {links.map((l) => {
             const active =
               l.href === "/matches"
@@ -58,7 +58,7 @@ export function Nav() {
               <Link
                 key={l.href}
                 href={l.href}
-                className={`text-sm no-underline transition-colors duration-150 ${
+                className={`text-sm no-underline transition-colors duration-150 px-2.5 ${
                   active
                     ? "text-text-primary font-[500]"
                     : "text-text-secondary hover:text-text-primary"
