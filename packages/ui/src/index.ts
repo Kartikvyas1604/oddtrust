@@ -5,3 +5,4 @@ export { MatchGrid, MatchCard } from './components/MatchGrid';
 export type { Fixture } from './components/MatchGrid';
 export { GatePanel } from './components/GatePanel';
 export { ProofFeed } from './components/ProofFeed';
+export { Footer } from './components/Footer';

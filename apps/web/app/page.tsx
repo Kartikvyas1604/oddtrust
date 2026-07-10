@@ -2,6 +2,7 @@
 
 import { Hero, MatchGrid, GatePanel, ProofFeed } from "@oddtrust/ui";
 import { useEffect, useState } from "react";
+import Link from "next/link";
 
 interface HealthStat {
   totalChecks: number;
@@ -73,18 +74,34 @@ export default function Home() {
         <ProofFeed />
       </section>
 
-      <footer className="py-8 border-t border-line-hairline text-center">
-        <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-3">
-            <span className="text-sm font-[500] tracking-tight text-text-secondary">OddsTrust</span>
-            <span className="h-3 w-px bg-line-hairline" />
-            <span className="font-mono text-[11px] text-text-tertiary">On-Chain Trust Oracle</span>
+      <section className="py-16 border-t border-line-hairline">
+        <div className="max-w-2xl mx-auto text-center">
+          <h2 className="text-xs font-mono text-text-secondary uppercase tracking-[0.15em] mb-4">
+            Built for Composability
+          </h2>
+          <p className="text-sm text-text-secondary leading-relaxed mb-8">
+            OddsTrust is an autonomous on-chain trust oracle that verifies the consistency of sports
+            betting odds across multiple markets. Every check produces a cryptographically verifiable
+            proof committed to Solana.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Link
+              href="/docs"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-bg-raised border border-line-hairline rounded-lg text-sm text-text-primary hover:border-pitch-green/30 hover:text-pitch-green transition-all no-underline"
+            >
+              <span>Read the Docs</span>
+              <span className="font-mono text-xs">&rarr;</span>
+            </Link>
+            <Link
+              href="/matches"
+              className="inline-flex items-center gap-2 px-5 py-2.5 bg-pitch-green/10 border border-pitch-green/20 rounded-lg text-sm text-pitch-green hover:bg-pitch-green/15 transition-all no-underline"
+            >
+              <span>View Live Matches</span>
+              <span className="font-mono text-xs">&rarr;</span>
+            </Link>
           </div>
-          <span className="font-mono text-[10px] text-text-tertiary opacity-50">
-            NOT FINANCIAL ADVICE · FOR DEMONSTRATION PURPOSES ONLY
-          </span>
         </div>
-      </footer>
+      </section>
     </>
   );
 }

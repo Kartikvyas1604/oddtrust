@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { Fraunces, Martian_Mono } from "next/font/google";
 import "./globals.css";
-import { Background } from "@oddtrust/ui";
-import { Nav } from "@oddtrust/ui";
+import { Background, Nav, Footer } from "@oddtrust/ui";
 
 const fraunces = Fraunces({
   subsets: ["latin"],
@@ -19,7 +18,7 @@ const martianMono = Martian_Mono({
 export const metadata: Metadata = {
   title: "OddsTrust — On-Chain Trust Oracle",
   description:
-    "Autonomous on-chain trust oracle for TxLINE World Cup odds data. Verifies market integrity across 130+ live fixtures.",
+    "Autonomous on-chain trust oracle for sports betting odds verification. Detects anomalies, computes arbitrage stakes, and publishes proofs to Solana.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -30,6 +29,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <div className="relative z-10 mx-auto max-w-[1440px] px-6 lg:px-12 min-h-screen flex flex-col">
           <Nav />
           <main className="flex-1">{children}</main>
+          <Footer />
         </div>
       </body>
     </html>

@@ -4,58 +4,46 @@ import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
 
-interface Market {
-  name: string;
-  outcomes: { label: string; odds: number }[];
-}
-
-const markets: Market[] = [
-  {
-    name: "Match Winner",
-    outcomes: [
-      { label: "{home} (Home)", odds: 1.85 },
-      { label: "Draw", odds: 3.40 },
-      { label: "{away} (Away)", odds: 2.10 },
-    ],
-  },
-  {
-    name: "Over / Under 2.5",
-    outcomes: [
-      { label: "Over 2.5", odds: 1.95 },
-      { label: "Under 2.5", odds: 1.95 },
-    ],
-  },
-  {
-    name: "Both Teams to Score",
-    outcomes: [
-      { label: "Yes", odds: 1.80 },
-      { label: "No", odds: 2.05 },
-    ],
-  },
-  {
-    name: "Correct Score 1-0",
-    outcomes: [
-      { label: "{home} 1-0", odds: 6.50 },
-      { label: "{away} 1-0", odds: 7.20 },
-    ],
-  },
-];
-
-const implied = (o: number) => 1 / o;
-const fmtPct = (p: number) => `${(p * 100).toFixed(2)}%`;
-
 interface FixtureDetail {
   id: string;
   homeTeam: string;
   awayTeam: string;
   startTime: string;
   status: string;
+  homeScore: number | null;
+  awayScore: number | null;
 }
+
+interface ConsistencyCheck {
+  id: string;
+  marketSet: string[];
+  summedImpliedProbability: number;
+  isConsistent: boolean;
+  margin: number;
+  optimalStakes: Record<string, Record<string, number>> | null;
+  onChainStatus: string | null;
+  onChainTx: string | null;
+  createdAt: string;
+}
+
+interface OddsSnapshot {
+  id: string;
+  marketType: string;
+  rawOdds: Record<string, number>;
+  bookmakerMargin: number | null;
+  txlineProofRef: string | null;
+  ingestedAt: string;
+}
+
+const implied = (o: number) => 1 / o;
+const fmtPct = (p: number) => `${(p * 100).toFixed(2)}%`;
 
 export default function MatchDetail() {
   const params = useParams();
   const id = params.id as string;
   const [fixture, setFixture] = useState<FixtureDetail | null>(null);
+  const [checks, setChecks] = useState<ConsistencyCheck[]>([]);
+  const [odds, setOdds] = useState<OddsSnapshot[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -67,6 +55,8 @@ export default function MatchDetail() {
       })
       .then((data) => {
         if (data?.fixture) setFixture(data.fixture);
+        if (data?.recentChecks) setChecks(data.recentChecks);
+        if (data?.oddsSnapshots) setOdds(data.oddsSnapshots);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -94,13 +84,10 @@ export default function MatchDetail() {
     );
   }
 
-  const totalProb = markets.reduce((sum, mk) => {
-    const filled = mk.outcomes.map((o) => ({ ...o, label: o.label.replace("{home}", fixture.homeTeam).replace("{away}", fixture.awayTeam) }));
-    return sum + filled.reduce((s, o) => s + implied(o.odds), 0);
-  }, 0);
-
-  const marginPct = (totalProb - 1) * 100;
-  const consistent = marginPct < 5;
+  const latestCheck = checks[0];
+  const isConsistent = latestCheck?.isConsistent;
+  const margin = latestCheck?.margin ?? 0;
+  const totalSip = latestCheck?.summedImpliedProbability ?? 0;
 
   return (
     <section className="py-12">
@@ -110,80 +97,158 @@ export default function MatchDetail() {
         </Link>
       </div>
 
+      {/* Match Header */}
       <div className="mb-8 bg-bg-raised border border-line-hairline rounded-lg p-6">
         <div className="flex items-center justify-between mb-4">
           <span
             className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-[11px] uppercase tracking-wider border ${
-              consistent
+              isConsistent === true
                 ? "text-pitch-green border-pitch-green/20 bg-pitch-green/10"
-                : "text-signal-amber border-signal-amber/20 bg-signal-amber/10"
+                : isConsistent === false
+                ? "text-signal-amber border-signal-amber/20 bg-signal-amber/10"
+                : "text-text-tertiary border-line-hairline bg-bg-void"
             }`}
           >
-            <span className={`inline-block w-1.5 h-1.5 rounded-full ${consistent ? "bg-pitch-green" : "bg-signal-amber"}`} />
-            {consistent ? "Consistent" : "Flagged"}
+            <span className={`inline-block w-1.5 h-1.5 rounded-full ${
+              isConsistent === true ? "bg-pitch-green" :
+              isConsistent === false ? "bg-signal-amber" : "bg-text-tertiary"
+            }`} />
+            {isConsistent === true ? "Consistent" :
+             isConsistent === false ? "Flagged" : "No Data"}
           </span>
-          <span className="font-mono text-xs text-text-tertiary">{new Date(fixture.startTime).toLocaleDateString()}</span>
+          <span className="font-mono text-xs text-text-tertiary">
+            {new Date(fixture.startTime).toLocaleDateString("en-US", {
+              weekday: "short",
+              month: "short",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            })}
+          </span>
         </div>
 
         <h1 className="text-2xl sm:text-3xl font-[500] mb-4">
           {fixture.homeTeam} <span className="text-text-tertiary font-[300]">v</span> {fixture.awayTeam}
         </h1>
 
-        <div className="flex items-center gap-4">
-          <span className="text-sm text-text-secondary">Margin</span>
-          <span className={`font-mono text-xl ${consistent ? "text-pitch-green" : "text-signal-amber"}`}>
-            {marginPct >= 0 ? "+" : ""}{marginPct.toFixed(2)}%
-          </span>
+        <div className="flex items-center gap-6">
+          <div>
+            <span className="text-xs text-text-secondary block mb-0.5">Margin</span>
+            <span className={`font-mono text-xl ${isConsistent === false ? "text-signal-amber" : "text-pitch-green"}`}>
+              {margin >= 0 ? "+" : ""}{(margin * 100).toFixed(2)}%
+            </span>
+          </div>
+          <div className="h-8 w-px bg-line-hairline" />
+          <div>
+            <span className="text-xs text-text-secondary block mb-0.5">&Sigma;(1/odds)</span>
+            <span className="font-mono text-xl text-text-primary">{fmtPct(totalSip)}</span>
+          </div>
+          {latestCheck?.onChainStatus && (
+            <>
+              <div className="h-8 w-px bg-line-hairline" />
+              <div>
+                <span className="text-xs text-text-secondary block mb-0.5">On-Chain</span>
+                <span className={`font-mono text-sm ${
+                  latestCheck.onChainStatus === "confirmed" ? "text-pitch-green" :
+                  latestCheck.onChainStatus === "pending" ? "text-signal-amber" : "text-text-tertiary"
+                }`}>
+                  {latestCheck.onChainStatus}
+                </span>
+              </div>
+            </>
+          )}
         </div>
       </div>
 
-      <h2 className="text-xs font-mono text-text-secondary uppercase tracking-[0.15em] mb-4">Market Breakdown</h2>
-
-      <div className="space-y-3 mb-8">
-        {markets.map((mk) => {
-          const filled = mk.outcomes.map((o) => ({ ...o, label: o.label.replace("{home}", fixture.homeTeam).replace("{away}", fixture.awayTeam) }));
-          const sumProbs = filled.reduce((s, o) => s + implied(o.odds), 0);
-          return (
-            <div key={mk.name} className="bg-bg-raised border border-line-hairline rounded-lg p-6">
-              <div className="flex items-center justify-between mb-3">
-                <span className="text-xs text-text-secondary">{mk.name}</span>
-                <span className={`font-mono text-[11px] ${sumProbs > 1.05 ? "text-signal-amber" : "text-pitch-green"}`}>
-                  &Sigma; = {fmtPct(sumProbs)}
-                </span>
-              </div>
-              <div className="space-y-2">
-                {filled.map((o) => {
-                  const prob = implied(o.odds);
-                  return (
-                    <div key={o.label} className="flex items-center justify-between border-b border-line-hairline/40 pb-2 last:border-b-0 last:pb-0 text-[12px]">
-                      <span className="text-text-primary">{o.label}</span>
-                      <div className="flex items-center gap-4">
-                        <span className="font-mono text-text-tertiary">{o.odds.toFixed(2)}</span>
-                        <span className="font-mono w-14 text-right text-text-secondary">{fmtPct(prob)}</span>
-                        <div className="h-1.5 w-16 rounded-full bg-bg-void overflow-hidden">
-                          <div className="h-full rounded-full bg-pitch-green-dim" style={{ width: `${Math.min(prob * 100, 100)}%` }} />
+      {/* Odds Snapshots */}
+      {odds.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-xs font-mono text-text-secondary uppercase tracking-[0.15em] mb-4">Latest Odds</h2>
+          <div className="space-y-3">
+            {odds.map((snapshot) => (
+              <div key={snapshot.id} className="bg-bg-raised border border-line-hairline rounded-lg p-6">
+                <div className="flex items-center justify-between mb-3">
+                  <span className="text-xs text-text-secondary capitalize">{snapshot.marketType.replace(/_/g, " ")}</span>
+                  <div className="flex items-center gap-3">
+                    {snapshot.bookmakerMargin !== null && (
+                      <span className={`font-mono text-[11px] ${snapshot.bookmakerMargin > 0.05 ? "text-signal-amber" : "text-pitch-green"}`}>
+                        Margin: {(snapshot.bookmakerMargin * 100).toFixed(2)}%
+                      </span>
+                    )}
+                    <span className="font-mono text-[10px] text-text-tertiary">
+                      {new Date(snapshot.ingestedAt).toLocaleTimeString("en-US", { hour12: false })}
+                    </span>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  {Object.entries(snapshot.rawOdds).map(([outcome, odds]) => {
+                    const prob = implied(odds);
+                    return (
+                      <div key={outcome} className="flex items-center justify-between border-b border-line-hairline/40 pb-2 last:border-b-0 last:pb-0 text-[12px]">
+                        <span className="text-text-primary capitalize">{outcome}</span>
+                        <div className="flex items-center gap-4">
+                          <span className="font-mono text-text-tertiary">{odds.toFixed(2)}</span>
+                          <span className="font-mono w-14 text-right text-text-secondary">{fmtPct(prob)}</span>
+                          <div className="h-1.5 w-16 rounded-full bg-bg-void overflow-hidden">
+                            <div className="h-full rounded-full bg-pitch-green-dim" style={{ width: `${Math.min(prob * 100, 100)}%` }} />
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            ))}
+          </div>
+        </div>
+      )}
 
-      <div className="bg-bg-raised border border-line-hairline rounded-lg p-6">
-        <h3 className="text-xs text-text-secondary uppercase tracking-[0.12em] mb-2">Consistency Check</h3>
-        <p className="text-[12px] leading-relaxed text-text-secondary">
-          Total implied probability across all markets: <strong className="font-mono text-text-primary">{fmtPct(totalProb)}</strong>.
-          Bookmaker margin:{" "}
-          <strong className={`font-mono ${consistent ? "text-pitch-green" : "text-signal-amber"}`}>{marginPct.toFixed(2)}%</strong>.
-          {consistent
-            ? " Margins are within the expected range — odds are consistent."
-            : " Margins exceed the expected threshold — odds may be inconsistent."}
-        </p>
-      </div>
+      {/* Consistency Check History */}
+      {checks.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-xs font-mono text-text-secondary uppercase tracking-[0.15em] mb-4">Check History</h2>
+          <div className="bg-bg-raised border border-line-hairline rounded-lg overflow-hidden">
+            <div className="divide-y divide-line-hairline/50">
+              {checks.map((check) => (
+                <div key={check.id} className="flex items-center gap-4 px-4 py-3">
+                  <span className={`inline-block w-1.5 h-1.5 rounded-full shrink-0 ${
+                    check.isConsistent ? "bg-pitch-green" : "bg-signal-amber"
+                  }`} />
+                  <span className="font-mono text-xs text-text-primary shrink-0">
+                    {fmtPct(check.summedImpliedProbability)}
+                  </span>
+                  <span className={`font-mono text-[11px] shrink-0 ${
+                    check.isConsistent ? "text-pitch-green" : "text-signal-amber"
+                  }`}>
+                    {check.isConsistent ? "PASS" : "FLAG"}
+                  </span>
+                  <span className="font-mono text-[10px] text-text-tertiary shrink-0">
+                    {check.marketSet.join(", ")}
+                  </span>
+                  {check.onChainTx && (
+                    <span className="font-mono text-[10px] text-pitch-green/60 truncate">
+                      tx: {check.onChainTx.slice(0, 16)}...
+                    </span>
+                  )}
+                  <span className="ml-auto font-mono text-[10px] text-text-tertiary shrink-0">
+                    {new Date(check.createdAt).toLocaleTimeString("en-US", { hour12: false })}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* No data state */}
+      {checks.length === 0 && odds.length === 0 && (
+        <div className="bg-bg-raised border border-line-hairline rounded-lg p-8 text-center mb-8">
+          <p className="text-sm text-text-secondary mb-2">No data available for this fixture</p>
+          <p className="text-xs text-text-tertiary">
+            Odds data will appear once the TxLINE ingestion pipeline is connected and processing live feeds.
+          </p>
+        </div>
+      )}
 
       <div className="mt-8">
         <Link href="/" className="font-mono text-xs text-text-secondary hover:text-text-primary transition-colors no-underline">
