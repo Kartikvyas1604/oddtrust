@@ -85,7 +85,7 @@ async function initializeTxLINE() {
     await ingester.syncAllFixtures();
     metricsRegistry.txlineConnectionStatus.set(1);
 
-    const stream = new TxLINEStream(txline.apiToken!);
+    const stream = new TxLINEStream(txline.apiToken!, txline.guestToken!);
     const pipeline = new DetectionPipeline(txline);
 
     stream.onMessage(async (msg) => {

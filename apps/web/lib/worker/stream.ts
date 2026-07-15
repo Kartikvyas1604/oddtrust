@@ -1,4 +1,3 @@
-import WebSocket from 'ws';
 import { getEnv } from '../config';
 import { getLogger } from '../logger';
 
@@ -6,20 +5,37 @@ export type OddsUpdateHandler = (data: Record<string, unknown>) => void;
 
 const MAX_RECONNECT_DELAY = 30000;
 const BASE_DELAY = 1000;
-const HEARTBEAT_INTERVAL = 30000;
+
+function parseSseBlock(block: string): { event?: string; data?: string } | null {
+  const message: { event?: string; data?: string } = {};
+  for (const rawLine of block.split(/\r?\n/)) {
+    if (!rawLine || rawLine.startsWith(':')) continue;
+    const sep = rawLine.indexOf(':');
+    const field = sep === -1 ? rawLine : rawLine.slice(0, sep);
+    const value = sep === -1 ? '' : rawLine.slice(sep + 1).replace(/^ /, '');
+    if (field === 'data') message.data = (message.data ?? '') + value + '\n';
+    if (field === 'event') message.event = value;
+  }
+  if (message.data) message.data = message.data.replace(/\n$/, '');
+  return message.data || message.event ? message : null;
+}
 
 export class TxLINEStream {
-  private ws: WebSocket | null = null;
+  private abortController: AbortController | null = null;
   private apiToken: string | null = null;
+  private guestToken: string | null = null;
   private handlers: Set<OddsUpdateHandler> = new Set();
   private shouldReconnect = true;
   private reconnectAttempt = 0;
-  private heartbeatTimer: ReturnType<typeof setInterval> | null = null;
 
   constructor(private subscriptionId: string) {}
 
   setApiToken(token: string): void {
     this.apiToken = token;
+  }
+
+  setGuestToken(token: string): void {
+    this.guestToken = token;
   }
 
   onOddsUpdate(handler: OddsUpdateHandler): () => void {
@@ -29,91 +45,84 @@ export class TxLINEStream {
 
   async connect(): Promise<void> {
     const log = getLogger();
-    const wsUrl = getEnv().TXLINE_WS_URL;
+    const url = getEnv().TXLINE_SSE_URL;
 
-    log.info({ url: wsUrl, subscriptionId: this.subscriptionId }, 'Connecting to TxLINE WebSocket');
+    this.abortController = new AbortController();
 
-    this.ws = new WebSocket(wsUrl, {
-      headers: {
-        'X-Subscription-Id': this.subscriptionId,
-        'X-API-Token': this.apiToken ?? '',
-      },
-    });
+    try {
+      log.info({ url, subscriptionId: this.subscriptionId }, 'Connecting to TxLINE SSE stream');
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${this.guestToken ?? ''}`,
+          'X-Api-Token': this.apiToken ?? '',
+          Accept: 'text/event-stream',
+          'Cache-Control': 'no-cache',
+        },
+        signal: this.abortController.signal,
+      });
 
-    this.ws.on('open', () => {
-      log.info('TxLINE WebSocket connected');
+      if (!response.ok) {
+        throw new Error(`SSE stream failed: ${response.status} ${response.statusText}`);
+      }
+
+      log.info('TxLINE SSE stream connected');
       this.reconnectAttempt = 0;
-      this.startHeartbeat();
 
-      this.ws?.send(JSON.stringify({
-        type: 'subscribe',
-        subscription_id: this.subscriptionId,
-      }));
-    });
+      const reader = response.body!.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
 
-    this.ws.on('message', (raw: Buffer) => {
-      try {
-        const msg = JSON.parse(raw.toString()) as Record<string, unknown>;
-        if (msg.type === 'heartbeat' || msg.type === 'pong') {
-          return;
-        }
-        if (msg.type === 'odds_update' || msg.event === 'odds.update') {
-          for (const handler of this.handlers) {
+      while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+
+        buffer += decoder.decode(value, { stream: true });
+        let separator = buffer.match(/\r?\n\r?\n/);
+
+        while (separator?.index !== undefined) {
+          const block = buffer.slice(0, separator.index);
+          buffer = buffer.slice(separator.index + separator[0].length);
+
+          const parsed = parseSseBlock(block);
+          if (parsed?.data) {
             try {
-              handler(msg);
-            } catch (err) {
-              log.error({ err }, 'Odds update handler error');
+              const raw = JSON.parse(parsed.data) as Record<string, unknown>;
+              if (parsed.event === 'heartbeat' || raw.type === 'heartbeat') continue;
+              if (raw.type === 'odds_update' || raw.event === 'odds.update') {
+                for (const handler of this.handlers) {
+                  try { handler(raw); } catch (err) { log.error({ err }, 'Odds update handler error'); }
+                }
+              }
+            } catch {
+              log.warn({ data: parsed.data.slice(0, 200) }, 'Failed to parse SSE data');
             }
           }
+          separator = buffer.match(/\r?\n\r?\n/);
         }
-      } catch {
-        log.warn({ raw: raw.toString().slice(0, 200) }, 'Failed to parse WS message');
       }
-    });
 
-    this.ws.on('close', (code: number, reason: Buffer) => {
-      log.warn({ code, reason: reason.toString() }, 'TxLINE WebSocket closed');
-      this.stopHeartbeat();
-      if (this.shouldReconnect) {
-        this.scheduleReconnect();
+      log.warn('TxLINE SSE stream ended');
+      if (this.shouldReconnect) this.scheduleReconnect();
+    } catch (err: any) {
+      if (err.name === 'AbortError') {
+        log.info('TxLINE SSE stream aborted');
+        return;
       }
-    });
-
-    this.ws.on('error', (err) => {
-      log.error({ err }, 'TxLINE WebSocket error');
-      this.ws?.close();
-    });
+      log.error({ err }, 'TxLINE SSE stream error');
+      if (this.shouldReconnect) this.scheduleReconnect();
+    }
   }
 
   disconnect(): void {
     this.shouldReconnect = false;
-    this.stopHeartbeat();
-    this.ws?.close();
-    this.ws = null;
-  }
-
-  private startHeartbeat(): void {
-    this.stopHeartbeat();
-    this.heartbeatTimer = setInterval(() => {
-      try {
-        this.ws?.send(JSON.stringify({ type: 'ping' }));
-      } catch {
-        this.ws?.close();
-      }
-    }, HEARTBEAT_INTERVAL);
-  }
-
-  private stopHeartbeat(): void {
-    if (this.heartbeatTimer) {
-      clearInterval(this.heartbeatTimer);
-      this.heartbeatTimer = null;
-    }
+    this.abortController?.abort();
+    this.abortController = null;
   }
 
   private scheduleReconnect(): void {
     const delay = Math.min(BASE_DELAY * Math.pow(2, this.reconnectAttempt), MAX_RECONNECT_DELAY);
     this.reconnectAttempt++;
-    getLogger().info({ delay, attempt: this.reconnectAttempt }, 'Scheduling TxLINE reconnect');
+    getLogger().info({ delay, attempt: this.reconnectAttempt }, 'Scheduling TxLINE SSE reconnect');
     setTimeout(() => this.connect(), delay);
   }
 }

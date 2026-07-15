@@ -18,7 +18,7 @@ const BASE_DELAY = 1000;
 
 export class TxLINEClient {
   private baseUrl: string;
-  private guestToken: string | null = null;
+  private _guestToken: string | null = null;
   private _apiToken: string | null = null;
   private subscriptionId: string | null = null;
   private connected = false;
@@ -36,16 +36,20 @@ export class TxLINEClient {
     return this._apiToken;
   }
 
+  /** The guest JWT from /auth/guest/start. Null until authenticate() succeeds. */
+  get guestToken(): string | null {
+    return this._guestToken;
+  }
+
   async authenticate(): Promise<void> {
     const log = getLogger();
     log.info('Authenticating with TxLINE (guest JWT flow)');
 
     const auth = await this.request<TxLINEAuthResponse>({
       method: 'POST',
-      path: '/auth/guest',
-      body: { client_id: getEnv().TXLINE_CLIENT_ID },
+      path: '/auth/guest/start',
     });
-    this.guestToken = auth.token;
+    this._guestToken = auth.token;
     log.info('Guest JWT obtained');
   }
 
